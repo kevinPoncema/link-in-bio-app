@@ -6,27 +6,22 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\LinkController;
 
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
+
+// Rutas de autenticación
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('profiles/{profile}', [ProfileController::class, 'show']);
-Route::get('profiles/{profile}/links', [LinkController::class, 'index']);
-Route::get('links/{link}', [LinkController::class, 'show']);
-
+Route::apiResource('/profiles', ProfileController::class)->only(['show']);
+Route::apiResource('/profiles.links', LinkController::class)->only(['index', 'show']);
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    Route::post('profiles', [ProfileController::class, 'store']);
-    
-    Route::get('my-profile', [ProfileController::class, 'index']); 
-    Route::put('profiles', [ProfileController::class, 'update']);
-    Route::delete('profiles', [ProfileController::class, 'destroy']);
-
-    Route::post('links', [LinkController::class, 'store']);
-    Route::put('links/{link}', [LinkController::class, 'update']);
-    Route::delete('links/{link}', [LinkController::class, 'destroy']);
+    // Rutas de perfiles (CRUD)
+    Route::apiResource('profiles', ProfileController::class)->only(['index', 'store', 'update', 'destroy']);
+    //rutas de links (CRUD)
+    Route::apiResource('links', LinkController::class)->only(['store', 'update', 'destroy']);
 });
+
+
