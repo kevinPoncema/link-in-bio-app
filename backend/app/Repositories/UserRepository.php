@@ -14,7 +14,11 @@ class UserRepository
      */
     public function getAll(): Collection
     {
-        return User::all();
+        try {
+            return User::all();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -25,7 +29,11 @@ class UserRepository
      */
     public function searchByName(string $name): Collection
     {
-        return User::where('name', 'like', '%' . $name . '%')->get();
+        try {
+            return User::where('name', 'like', '%' . $name . '%')->get();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -36,7 +44,11 @@ class UserRepository
      */
     public function findById(int $id): ?User
     {
-        return User::find($id);
+        try {
+            return User::find($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -47,7 +59,11 @@ class UserRepository
      */
     public function findByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        try {
+            return User::where('email', $email)->first();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -58,7 +74,11 @@ class UserRepository
      */
     public function create(array $data): User
     {
-        return User::create($data);
+        try {
+            return User::create($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -70,7 +90,11 @@ class UserRepository
      */
     public function update(User $user, array $data): bool
     {
-        return $user->update($data);
+        try {
+            return $user->update($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -81,6 +105,10 @@ class UserRepository
      */
     public function delete(User $user): ?bool
     {
-        return $user->delete();
+        try {
+            return $user->delete();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

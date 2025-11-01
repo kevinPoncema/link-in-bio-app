@@ -18,66 +18,99 @@ class UserService
 
     public function getAllUsers(): Collection
     {
-        return $this->userRepository->getAll();
+        try {
+            return $this->userRepository->getAll();
+        } catch (\Exception $e) {
+            // Puedes loguear el error aquí si lo deseas
+            throw $e;
+        }
     }
 
     public function findUserById(int $id): ?User
     {
-        return $this->userRepository->findById($id);
+        try {
+            return $this->userRepository->findById($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     public function searchUsersByName(string $name): Collection
     {
-        return $this->userRepository->searchByName($name);
+        try {
+            return $this->userRepository->searchByName($name);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     public function createUser(array $data): User
     {
-        $data['password'] = Hash::make($data['password']);
-        return $this->userRepository->create($data);
+        try {
+            $data['password'] = Hash::make($data['password']);
+            return $this->userRepository->create($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     public function updateUser(int $id, array $data): bool
     {
-        $user = $this->userRepository->findById($id);
+        try {
+            $user = $this->userRepository->findById($id);
 
-        if (!$user) {
-            return false;
-        }
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
+            if (!$user) {
+                return false;
+            }
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            }
 
-        return $this->userRepository->update($user, $data);
+            return $this->userRepository->update($user, $data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     public function deleteUser(int $id): bool
     {
-        $user = $this->userRepository->findById($id);
+        try {
+            $user = $this->userRepository->findById($id);
 
-        if (!$user) {
-            return false;
+            if (!$user) {
+                return false;
+            }
+
+            return $this->userRepository->delete($user);
+        } catch (\Exception $e) {
+            throw $e;
         }
-
-        return $this->userRepository->delete($user);
     }
 
 
 
     public function attemptLogin(string $email, string $password): ?User
     {
-        $user = $this->userRepository->findByEmail($email);
+        try {
+            $user = $this->userRepository->findByEmail($email);
 
-        if ($user && Hash::check($password, $user->password)) {
-            return $user;
+            if ($user && Hash::check($password, $user->password)) {
+                return $user;
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            throw $e;
         }
-
-        return null;
     }
 
     public function registerUser(array $data): User
     {
-        // En este caso, simplemente delegamos a createUser ya que maneja el hashing
-        return $this->createUser($data);
+        try {
+            // En este caso, simplemente delegamos a createUser ya que maneja el hashing
+            return $this->createUser($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

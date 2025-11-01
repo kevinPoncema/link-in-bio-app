@@ -22,7 +22,11 @@ class ProfileService
      */
     public function getProfilesByUserId(int $userId)
     {
-        return $this->profileRepository->getByUserId($userId);
+        try {
+            return $this->profileRepository->getByUserId($userId);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -33,7 +37,11 @@ class ProfileService
      */
     public function getProfileById(int $id): ?Profile
     {
-        return $this->profileRepository->findById($id);
+        try {
+            return $this->profileRepository->findById($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -45,9 +53,13 @@ class ProfileService
      */
     public function createProfile(array $data): Profile
     {
-        // Aquí se podría agregar lógica para verificar si el slug ya existe,
-        // generar un slug automáticamente, o manejar la subida de imágenes.
-        return $this->profileRepository->create($data);
+        try {
+            // Aquí se podría agregar lógica para verificar si el slug ya existe,
+            // generar un slug automáticamente, o manejar la subida de imágenes.
+            return $this->profileRepository->create($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -59,14 +71,18 @@ class ProfileService
      */
     public function updateProfileByUserId(int $userId, array $data): ?Profile
     {
-        $profile = $this->profileRepository->findByUserId($userId);
+        try {
+            $profile = $this->profileRepository->findByUserId($userId);
 
-        if (!$profile) {
-            return null;
+            if (!$profile) {
+                return null;
+            }
+
+            $this->profileRepository->update($profile, $data);
+            return $profile;
+        } catch (\Exception $e) {
+            throw $e;
         }
-
-        $this->profileRepository->update($profile, $data);
-        return $profile;
     }
 
     /**
@@ -77,12 +93,16 @@ class ProfileService
      */
     public function deleteProfileByUserId(int $userId): bool
     {
-        $profile = $this->profileRepository->findByUserId($userId);
+        try {
+            $profile = $this->profileRepository->findByUserId($userId);
 
-        if (!$profile) {
-            return false;
+            if (!$profile) {
+                return false;
+            }
+
+            return $this->profileRepository->delete($profile);
+        } catch (\Exception $e) {
+            throw $e;
         }
-
-        return $this->profileRepository->delete($profile);
     }
 }

@@ -18,8 +18,9 @@ class AuthController extends Controller
     }
 
 
-    public function register(Request $request): JsonResponse
+    public function register(Request $request)
     {
+        try{
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -35,33 +36,45 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'Bearer',
         ], 201);
+        } catch (\Exception $e) {
+        return response()->json(['message' => 'Error al registrar el usuario.', 'error' => $e->getMessage()], 500);
+       }
     }
 
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = $this->userService->attemptLogin($request->email, $request->password);
-
-        if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => ['Las credenciales proporcionadas son incorrectas.'],
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
             ]);
+
+            $user = $this->userService->attemptLogin($request->email, $request->password);
+
+            if (!$user) {
+                throw ValidationException::withMessages([
+                    'email' => ['Las credenciales proporcionadas son incorrectas.'],
+                ]);
+            }
+
+            $user->tokens()->delete();
+
+            // Generar nuevo token
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user->only('id', 'name', 'email'),
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al iniciar sesión.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $user->tokens()->delete();
-
-        // Generar nuevo token
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user->only('id', 'name', 'email'),
-        ]);
     }
 
     /**
@@ -69,8 +82,14 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Sesión cerrada exitosamente.'], 200);
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json(['message' => 'Sesión cerrada exitosamente.'], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al cerrar la sesión.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -15,7 +15,11 @@ class ProfileRepository
      */
     public function getByUserId(int $userId): \Illuminate\Database\Eloquent\Collection
     {
-        return Profile::where('user_id', $userId)->get();
+        try {
+            return Profile::where('user_id', $userId)->get();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -26,7 +30,11 @@ class ProfileRepository
      */
     public function findById(int $id): ?Profile
     {
-        return Profile::find($id);
+        try {
+            return Profile::find($id);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -37,7 +45,11 @@ class ProfileRepository
      */
     public function create(array $data): Profile
     {
-        return Profile::create($data);
+        try {
+            return Profile::create($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -49,7 +61,11 @@ class ProfileRepository
      */
     public function update(Profile $profile, array $data): bool
     {
-        return $profile->update($data);
+        try {
+            return $profile->update($data);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -60,6 +76,10 @@ class ProfileRepository
      */
     public function delete(Profile $profile): ?bool
     {
-        return $profile->delete();
+        try {
+            return $profile->delete();
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }
