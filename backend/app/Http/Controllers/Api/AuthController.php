@@ -28,7 +28,6 @@ class AuthController extends Controller
 
         $user = $this->userService->registerUser($request->only('name', 'email', 'password'));
 
-        // Genera el token de Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
