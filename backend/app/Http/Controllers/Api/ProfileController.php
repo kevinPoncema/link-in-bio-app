@@ -33,11 +33,11 @@ class ProfileController extends Controller
         
         // Validación
         $request->validate([
-            // Asegura que no exista otro perfil para este usuario
-            'user_id' => ':profiles,user_id', 
             'main_title' => 'required|string|max:255',
             'slug' => 'required|string|unique:profiles|max:255',
-            // ... otras validaciones
+            'description' => 'nullable|string',
+            'profile_picture_url' => 'nullable|url',
+            'theme_name' => 'nullable|string|max:50',
         ]);
 
         $data = $request->only('profile_picture_url', 'main_title', 'description', 'slug', 'theme_name');
