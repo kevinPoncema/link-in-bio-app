@@ -54,8 +54,7 @@ class ProfileService
     public function createProfile(array $data): Profile
     {
         try {
-            // Aquí se podría agregar lógica para verificar si el slug ya existe,
-            // generar un slug automáticamente, o manejar la subida de imágenes.
+            // Permitir que un usuario tenga varios perfiles, solo se valida el slug único en la capa de controlador
             return $this->profileRepository->create($data);
         } catch (\Exception $e) {
             throw $e;
@@ -69,10 +68,10 @@ class ProfileService
      * @param array $data
      * @return Profile|null
      */
-    public function updateProfileByUserId(int $userId, array $data): ?Profile
+    public function updateProfileById(int $profileId, array $data): ?Profile
     {
         try {
-            $profile = $this->profileRepository->findByUserId($userId);
+            $profile = $this->profileRepository->findById($profileId);
 
             if (!$profile) {
                 return null;
@@ -91,15 +90,13 @@ class ProfileService
      * @param int $userId
      * @return bool
      */
-    public function deleteProfileByUserId(int $userId): bool
+    public function deleteProfileById(int $profileId): bool
     {
         try {
-            $profile = $this->profileRepository->findByUserId($userId);
-
+            $profile = $this->profileRepository->findById($profileId);
             if (!$profile) {
                 return false;
             }
-
             return $this->profileRepository->delete($profile);
         } catch (\Exception $e) {
             throw $e;

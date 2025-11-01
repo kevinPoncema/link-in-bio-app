@@ -61,18 +61,16 @@ class ProfileController extends Controller
         return response()->json($profile);
     }
   
-    public function update(Request $request): JsonResponse
+    public function update(Request $request, int $id): JsonResponse
     {
-        $userId = $request->user()->id;
-        
         $request->validate([
             'main_title' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|max:255|unique:profiles,slug,'.$userId.',user_id',
+            'slug' => 'sometimes|required|string|max:255|unique:profiles,slug,'.$id,
         ]);
 
         $data = $request->only('profile_picture_url', 'main_title', 'description', 'slug', 'theme_name');
 
-        $profile = $this->profileService->updateProfileByUserId($userId, $data);
+        $profile = $this->profileService->updateProfileById($id, $data);
 
         if (!$profile) {
             return response()->json(['message' => 'Perfil no encontrado para actualizar.'], 404);
@@ -81,11 +79,9 @@ class ProfileController extends Controller
         return response()->json($profile);
     }
     
-    public function destroy(Request $request): JsonResponse
+    public function destroy(int $id): JsonResponse
     {
-        $userId = $request->user()->id;
-        
-        $deleted = $this->profileService->deleteProfileByUserId($userId);
+        $deleted = $this->profileService->deleteProfileById($id);
 
         if (!$deleted) {
             return response()->json(['message' => 'Perfil no encontrado para eliminar.'], 404);
