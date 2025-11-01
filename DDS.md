@@ -72,34 +72,34 @@ Este diagrama muestra las entidades principales, sus atributos y las relaciones 
 
 ```mermaid
 erDiagram
-    users ||--o{ profiles : "has"
-    profiles ||--o{ links : "includes"
+    USERS ||--o{ PROFILES : has
+    PROFILES ||--o{ LINKS : includes
 
-    users {
-        BIGINT id PK
-        VARCHAR name
-        VARCHAR email UNIQUE
-        VARCHAR password
-        VARCHAR remember_token
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK
+        varchar password
+        varchar remember_token
     }
 
-    profiles {
-        BIGINT id PK
-        BIGINT user_id FK "Owner"
-        VARCHAR profile_picture_url "S3 or local URL"
-        VARCHAR main_title
-        TEXT description
-        VARCHAR slug UNIQUE "Public URL identifier"
-        VARCHAR theme_name "Selected design theme name"
+    PROFILES {
+        bigint id PK
+        bigint user_id FK
+        varchar profile_picture_url
+        varchar main_title
+        text description
+        varchar slug UK
+        varchar theme_name
     }
 
-    links {
-        BIGINT id PK
-        BIGINT profile_id FK
-        VARCHAR title
-        VARCHAR url
-        VARCHAR icon_class "Font Awesome class name"
-        INTEGER order "Display position for drag-and-drop"
+    LINKS {
+        bigint id PK
+        bigint profile_id FK
+        varchar title
+        varchar url
+        varchar icon_class
+        int order
     }
 ```
 # Frontend
