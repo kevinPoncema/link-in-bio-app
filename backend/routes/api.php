@@ -14,7 +14,8 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::apiResource('/profiles', ProfileController::class)->only(['show']);
-Route::apiResource('/profiles.links', LinkController::class)->only(['index', 'show']);
+Route::apiResource('/links', LinkController::class)->only(['show']);
+Route::get('/profiles/{profile}/links', [LinkController::class, 'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
