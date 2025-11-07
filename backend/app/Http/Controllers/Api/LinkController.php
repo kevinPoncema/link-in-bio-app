@@ -25,7 +25,7 @@ class LinkController extends Controller
     {
         try {
             // 1. Verificar si el perfil existe (para rutas GET/Públicas)
-            if (!$this->profileService->getProfileById($profile)) {
+            if (!$this->profileService->getProfileByIdOrSlug($profile)) {
                 return response()->json(['message' => 'Perfil no encontrado.'], 404);
             }
 
