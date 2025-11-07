@@ -64,8 +64,8 @@ const LinkCreate = ({
     } else {
       // Si estamos creando, agregar campos de creación
       linkData.profile_id = profileId;
-      linkData.order = 777; // Valor temporal
       linkData.is_active = true;
+      // El orden será calculado por el componente padre
     }
 
     onSubmit(linkData);
@@ -175,7 +175,9 @@ const LinkCreate = ({
             {/* Info sobre el orden */}
             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3">
               <p className="text-xs text-blue-300">
-                💡 El orden se establecerá automáticamente. Podrás reordenar los links más adelante.
+                💡 {editingLink 
+                  ? 'El orden se mantendrá. Usa drag & drop en la lista para reordenar.' 
+                  : 'El link se agregará automáticamente al final. Usa drag & drop para reordenar después.'}
               </p>
             </div>
           </div>

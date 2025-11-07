@@ -12,6 +12,117 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Componente para items arrastrables
+const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: link.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-gray-700 rounded-xl border ${
+        isDragging ? 'border-orange-500 shadow-lg' : 'border-gray-600'
+      } hover:border-gray-500 transition-all`}
+    >
+      <div className="p-4 flex items-center space-x-4">
+        {/* Drag Handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-300"
+        >
+          <GripVertical className="w-5 h-5" />
+        </div>
+
+        {/* Order Badge */}
+        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+          <span className="text-sm font-bold text-white">
+            {index + 1}
+          </span>
+        </div>
+
+        {/* Link Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2 mb-1">
+            <h4 className="text-white font-semibold truncate">
+              {link.title}
+            </h4>
+            {link.icon_class && (
+              <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                {link.icon_class}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <ExternalLink className="w-3 h-3 text-gray-500 flex-shrink-0" />
+            <a 
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-400 hover:text-orange-400 truncate transition-colors"
+            >
+              {link.url}
+            </a>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onEdit(link)}
+            disabled={deletingId === link.id}
+            className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Editar link"
+          >
+            <Edit2 className="w-4 h-4 text-blue-400" />
+          </button>
+          <button
+            onClick={() => onDelete(link.id)}
+            disabled={deletingId === link.id}
+            className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Eliminar link"
+          >
+            {deletingId === link.id ? (
+              <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+            ) : (
+              <Trash2 className="w-4 h-4 text-red-400" />
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   const [links, setLinks] = useState([]);
@@ -23,6 +134,15 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   const [createError, setCreateError] = useState('');
   const [editingLink, setEditingLink] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [reordering, setReordering] = useState(false);
+
+  // Configurar sensores para drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (profileId) {
@@ -48,6 +168,54 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
       console.error('Error al cargar links:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Función para calcular el siguiente orden disponible
+  const getNextOrder = () => {
+    if (links.length === 0) return 1;
+    const maxOrder = Math.max(...links.map(link => link.order || 0));
+    return maxOrder + 1;
+  };
+
+  // Manejar el evento de drag end
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = links.findIndex(link => link.id === active.id);
+    const newIndex = links.findIndex(link => link.id === over.id);
+
+    // Reordenar localmente primero para feedback inmediato
+    const newLinks = arrayMove(links, oldIndex, newIndex);
+    setLinks(newLinks);
+
+    // Actualizar los valores de order
+    const updatedLinks = newLinks.map((link, index) => ({
+      id: link.id,
+      order: index + 1
+    }));
+
+    try {
+      setReordering(true);
+      await LinkRequest.updateLinksOrder(updatedLinks);
+      setSuccess('¡Orden actualizado exitosamente!');
+      setTimeout(() => setSuccess(''), 3000);
+      
+      // Recargar para sincronizar con el servidor
+      loadLinks();
+    } catch (err) {
+      setError(err.message || 'Error al actualizar el orden');
+      console.error('Error al reordenar:', err);
+      setTimeout(() => setError(''), 5000);
+      
+      // Revertir cambios en caso de error
+      loadLinks();
+    } finally {
+      setReordering(false);
     }
   };
 
@@ -101,8 +269,12 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
         await LinkRequest.updateLink(linkData.id, linkData);
         setSuccess('¡Link actualizado exitosamente!');
       } else {
-        // Crear nuevo link
-        await LinkRequest.createLink(linkData);
+        // Crear nuevo link con orden automático
+        const newLinkData = {
+          ...linkData,
+          order: getNextOrder() // Calcular el siguiente orden
+        };
+        await LinkRequest.createLink(newLinkData);
         setSuccess('¡Link creado exitosamente!');
       }
       
@@ -192,81 +364,46 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
             </button>
           </div>
         ) : (
-          links.map((link, index) => (
-            <div
-              key={link.id}
-              className="flex items-center space-x-3 bg-gray-700 p-4 rounded-xl border border-gray-600 hover:border-orange-500 transition-all group"
+          <>
+            {reordering && (
+              <div className="flex items-center space-x-2 bg-blue-900/20 border border-blue-700/30 text-blue-300 px-4 py-3 rounded-xl mb-4">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Actualizando orden...</span>
+              </div>
+            )}
+            
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              {/* Drag Handle */}
-              <div className="flex-shrink-0 cursor-move opacity-0 group-hover:opacity-100 transition-opacity">
-                <GripVertical className="w-5 h-5 text-gray-500" />
-              </div>
-
-              {/* Order Number */}
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-                <span className="text-sm font-semibold text-gray-300">
-                  {link.order || index + 1}
-                </span>
-              </div>
-
-              {/* Link Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2 mb-1">
-                  <h4 className="font-semibold text-white truncate">
-                    {link.title}
-                  </h4>
-                  {link.icon_class && (
-                    <span className="text-xs text-gray-500">
-                      {link.icon_class}
-                    </span>
-                  )}
+              <SortableContext
+                items={links.map(link => link.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {links.map((link, index) => (
+                    <SortableLink
+                      key={link.id}
+                      link={link}
+                      index={index}
+                      onEdit={handleEditLink}
+                      onDelete={handleDeleteLink}
+                      deletingId={deletingId}
+                    />
+                  ))}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <ExternalLink className="w-3 h-3 text-gray-500 flex-shrink-0" />
-                  <a 
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-gray-400 hover:text-orange-400 truncate transition-colors"
-                  >
-                    {link.url}
-                  </a>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handleEditLink(link)}
-                  disabled={deletingId === link.id}
-                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Editar link"
-                >
-                  <Edit2 className="w-4 h-4 text-blue-400" />
-                </button>
-                <button
-                  onClick={() => handleDeleteLink(link.id)}
-                  disabled={deletingId === link.id}
-                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="Eliminar link"
-                >
-                  {deletingId === link.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-red-400" />
-                  ) : (
-                    <Trash2 className="w-4 h-4 text-red-400" />
-                  )}
-                </button>
-              </div>
-            </div>
-          ))
+              </SortableContext>
+            </DndContext>
+          </>
         )}
       </div>
 
-      {/* Info de ordenamiento */}
+      {/* Info de reordenamiento */}
       {links.length > 0 && (
         <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
           <p className="text-xs text-blue-300">
-            💡 <span className="font-semibold">Próximamente:</span> Podrás reordenar los links arrastrando y soltando
+            💡 <span className="font-semibold">Arrastra y suelta</span> para reordenar los links. Los cambios se guardan automáticamente.
           </p>
         </div>
       )}
