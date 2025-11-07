@@ -7,7 +7,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'default',
       name: 'Default',
-      description: 'Tema predeterminado limpio y minimalista',
       available: true,
       preview: null, // Sin imagen de fondo
       colors: {
@@ -19,7 +18,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'gradient-sunset',
       name: 'Gradient Sunset',
-      description: 'Degradado cálido de atardecer',
       available: false,
       preview: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
       colors: {
@@ -31,7 +29,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'ocean-blue',
       name: 'Ocean Blue',
-      description: 'Tonos azules del océano',
       available: false,
       preview: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=300&fit=crop',
       colors: {
@@ -43,7 +40,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'forest-green',
       name: 'Forest Green',
-      description: 'Naturaleza y tonos verdes',
       available: false,
       preview: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
       colors: {
@@ -55,7 +51,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'purple-night',
       name: 'Purple Night',
-      description: 'Elegancia nocturna púrpura',
       available: false,
       preview: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=300&fit=crop',
       colors: {
@@ -67,7 +62,6 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
     {
       id: 'sunset-pink',
       name: 'Sunset Pink',
-      description: 'Rosa vibrante y energético',
       available: false,
       preview: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=300&fit=crop',
       colors: {
@@ -101,7 +95,7 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
         <div 
           className="grid grid-cols-1 gap-3 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500"
           style={{ 
-            maxHeight: 'calc(3 * 96px + 2 * 12px)', // 3 temas * altura(96px) + 2 gaps(12px)
+            maxHeight: 'calc(3 * 84px + 2 * 12px)', // 3 temas * altura(84px) + 2 gaps(12px)
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch' // Scroll suave en iOS
           }}
@@ -122,9 +116,9 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
               `}
             >
-              <div className="flex items-center p-3">
+              <div className="flex items-center p-3 h-[72px]">
                 {/* Preview Section */}
-                <div className="flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden mr-4">
+                <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden mr-3">
                   {theme.preview ? (
                     <img
                       src={theme.preview}
@@ -138,49 +132,30 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                         background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})` 
                       }}
                     >
-                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                        <div className="w-4 h-4 bg-white/40 rounded-full"></div>
+                      <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <div className="w-3 h-3 bg-white/40 rounded-full"></div>
                       </div>
                     </div>
                   )}
                 </div>
 
                 {/* Theme Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 mb-1">
-                    <h4 className="font-semibold text-white truncate">
+                <div className="flex-1 min-w-0 flex items-center">
+                  <div className="flex items-center space-x-2">
+                    <h4 className="text-sm font-medium text-white">
                       {theme.name}
                     </h4>
                     {!theme.available && (
                       <Lock className="w-3 h-3 text-gray-500 flex-shrink-0" />
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-1">
-                    {theme.description}
-                  </p>
-                  
-                  {/* Color Palette */}
-                  <div className="flex items-center space-x-1 mt-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border border-gray-600"
-                      style={{ backgroundColor: theme.colors.primary }}
-                    ></div>
-                    <div 
-                      className="w-4 h-4 rounded-full border border-gray-600"
-                      style={{ backgroundColor: theme.colors.secondary }}
-                    ></div>
-                    <div 
-                      className="w-4 h-4 rounded-full border border-gray-600"
-                      style={{ backgroundColor: theme.colors.background }}
-                    ></div>
-                  </div>
                 </div>
 
                 {/* Selected Indicator */}
                 {selectedTheme === theme.id && theme.available && (
                   <div className="flex-shrink-0 ml-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
-                      <Check className="w-5 h-5 text-white" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
                     </div>
                   </div>
                 )}
@@ -188,7 +163,7 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                 {/* Coming Soon Badge */}
                 {!theme.available && (
                   <div className="flex-shrink-0 ml-3">
-                    <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-400 font-medium">
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-400 font-medium whitespace-nowrap">
                       Próximamente
                     </span>
                   </div>
