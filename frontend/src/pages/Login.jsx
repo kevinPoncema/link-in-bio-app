@@ -1,33 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, CheckCircle, XCircle, Facebook, Twitter, Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
-
-// --- MOCK API CALL (To make the component runnable without external dependencies) ---
-// Since the original code depended on an external 'AuthRequest', we mock it here.
-const AuthRequest = {
-  login: (credentials) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (credentials.email === 'test@dark.com' && credentials.password === '12345') {
-          resolve({ token: 'mock-token-login' });
-        } else {
-          reject(new Error('Credenciales inválidas.'));
-        }
-      }, 1500);
-    });
-  },
-  register: (data) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (data.email.includes('fail')) {
-          reject(new Error('Este email ya está en uso.'));
-        } else {
-          resolve({ user: { name: data.name, email: data.email } });
-        }
-      }, 1500);
-    });
-  },
-};
-// ---------------------------------------------------------------------------------
+import AuthRequest from '../api/AuthRequest';
+import { useNavigate } from 'react-router-dom';
 
 // Tailwind CSS classes for the primary gradient (Red/Orange) used on buttons
 const gradientPrimary = 'bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600';
@@ -96,12 +70,14 @@ const InputField = ({ id, name, type, value, placeholder, required, icon: Icon, 
 
 
 function App() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
+    remember: false,
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -112,10 +88,10 @@ function App() {
 
   // Función de manejo de cambio de input
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ // Esto sigue disparando el re-render de App, pero no reconstruye InputField
+    const { name, value, type, checked } = e.target;
+    setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     });
     setError('');
     setSuccess('');
@@ -133,32 +109,36 @@ function App() {
         const response = await AuthRequest.login({
           email: formData.email,
           password: formData.password,
+          remember: formData.remember,
         });
         setSuccess('¡Inicio de sesión exitoso!');
+        
+        // Redirigir a /home después de 1 segundo
+        setTimeout(() => {
+          navigate('/home');
+        }, 1000);
       } else {
+        // Validar que las contraseñas coincidan
         if (formData.password !== formData.password_confirmation) {
           setError('Las contraseñas no coinciden');
           setLoading(false);
           return;
         }
+        
+        // Registro
         const response = await AuthRequest.register({
           name: formData.name,
           email: formData.email,
           password: formData.password,
           password_confirmation: formData.password_confirmation,
+          remember: formData.remember,
         });
-        setSuccess('¡Registro exitoso! Ahora puedes iniciar sesión.');
+        setSuccess('¡Registro exitoso! Redirigiendo...');
         
-        // Cambiar a modo login después del registro
+        // Redirigir a /home después de 1 segundo
         setTimeout(() => {
-          setIsLogin(true);
-          setFormData({
-            name: '',
-            email: formData.email,
-            password: '',
-            password_confirmation: '',
-          });
-        }, 2000);
+          navigate('/home');
+        }, 1000);
       }
     } catch (err) {
       setError(err.message || 'Ocurrió un error. Inténtalo de nuevo.');
@@ -174,6 +154,7 @@ function App() {
       email: '',
       password: '',
       password_confirmation: '',
+      remember: false,
     });
     setError('');
     setSuccess('');
@@ -202,7 +183,7 @@ function App() {
             Register
           </button>
         </div>
-
+            
         {/* Botones de inicio de sesión social (Facebook, Twitter, Google) */}
         {/* Estos botones simulan el acceso rápido utilizando credenciales de terceros. 
             Al hacer clic, usan la función setError para mostrar un mensaje informativo no bloqueante. */}
@@ -246,7 +227,7 @@ function App() {
               placeholder="ejemplo@correo.com"
               icon={Mail}
               autoComplete='email'
-              handleInputChange={handleInputChange} // Pasar la función de manejo de cambios
+              handleInputChange={handleInputChange} 
             />
 
             {/* Password field */}
@@ -260,9 +241,9 @@ function App() {
               placeholder="••••••••"
               icon={Lock}
               autoComplete={isLogin ? 'current-password' : 'new-password'}
-              handleInputChange={handleInputChange} // Pasar la función de manejo de cambios
-              showPassword={showPassword}           // Pasar estado de contraseña
-              setShowPassword={setShowPassword}     // Pasar función para cambiar estado
+              handleInputChange={handleInputChange}
+              showPassword={showPassword}
+              setShowPassword={setShowPassword}
             />
 
             {/* Password confirmation - only for register */}
@@ -277,9 +258,9 @@ function App() {
                 placeholder="••••••••"
                 icon={Lock}
                 autoComplete='new-password'
-                handleInputChange={handleInputChange} // Pasar la función de manejo de cambios
-                showPassword={showPassword}           // Pasar estado de contraseña
-                setShowPassword={setShowPassword}     // Pasar función para cambiar estado
+                handleInputChange={handleInputChange}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
               />
             )}
             
@@ -289,8 +270,10 @@ function App() {
                     <div className="flex items-center">
                         <input
                             id="remember-me"
-                            name="remember-me"
+                            name="remember"
                             type="checkbox"
+                            checked={formData.remember}
+                            onChange={handleInputChange}
                             className="h-4 w-4 text-orange-500 border-gray-600 rounded bg-gray-700 focus:ring-orange-500"
                         />
                         <label htmlFor="remember-me" className="ml-2 block">
