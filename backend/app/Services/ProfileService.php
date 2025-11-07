@@ -30,15 +30,18 @@ class ProfileService
     }
 
     /**
-     * Obtiene un perfil por su ID primario.
+     * Obtiene un perfil por su ID primario o slug.
      *
-     * @param int $id
+     * @param string|int $identifier
      * @return Profile|null
      */
-    public function getProfileById(int $id): ?Profile
+    public function getProfileByIdOrSlug(string|int $identifier): ?Profile
     {
         try {
-            return $this->profileRepository->findById($id);
+            if (is_numeric($identifier)) {
+                return $this->profileRepository->findById((int)$identifier);
+            }
+            return $this->profileRepository->findBySlug($identifier);
         } catch (\Exception $e) {
             throw $e;
         }

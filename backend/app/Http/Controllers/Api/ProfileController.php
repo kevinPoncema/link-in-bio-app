@@ -49,10 +49,17 @@ class ProfileController extends Controller
     }
 
 
-    public function show(int $id): JsonResponse
+    /**
+     * Muestra un perfil específico por ID o slug.
+     * Esta ruta es pública.
+     *
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function show(string $id): JsonResponse
     {
-        // Este método usa el ID del recurso (perfil), no el ID del usuario
-        $profile = $this->profileService->getProfileById($id);
+        // Este método usa el ID del recurso (perfil) o slug, no el ID del usuario
+        $profile = $this->profileService->getProfileByIdOrSlug($id);
 
         if (!$profile) {
             return response()->json(['message' => 'Perfil no encontrado.'], 404);

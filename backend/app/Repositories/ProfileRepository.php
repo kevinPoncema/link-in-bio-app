@@ -37,6 +37,14 @@ class ProfileRepository
         }
     }
 
+    public function findBySlug(string $slug): ?Profile
+    {
+        try {
+            return Profile::where('slug', $slug)->first();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
     /**
      * Crea un nuevo perfil.
      *
