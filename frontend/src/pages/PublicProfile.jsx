@@ -13,7 +13,9 @@ function PublicProfile() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    loadProfileData();
+    if (slug) {
+      loadProfileData();
+    }
   }, [slug]);
 
   const loadProfileData = async () => {
@@ -23,14 +25,28 @@ function PublicProfile() {
 
       // Cargar perfil por slug
       const profileData = await ProfileRequest.getProfileById(slug);
+      console.log('Profile data:', profileData);
       setProfile(profileData);
 
       // Cargar links del perfil
       const linksData = await LinkRequest.getLinksByProfile(profileData.id);
+      console.log('Links data received:', linksData);
+      
+      // La respuesta puede ser un array directo o estar en data
+      const linksArray = Array.isArray(linksData) ? linksData : (linksData.data || []);
+      console.log('Links array:', linksArray);
+      
       // Filtrar solo links activos y ordenar
-      const activeLinks = (linksData.data || linksData)
-        .filter(link => link.is_active)
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      const activeLinks = linksArray
+        .filter(link => link.is_active !== false) // Mostrar todos excepto los explícitamente inactivos
+        .sort((a, b) => (a.order || 0) - (b.order || 0))
+        .map(link => ({
+          ...link,
+          // Limpiar las barras invertidas de las URLs
+          url: link.url.replace(/\\/g, '')
+        }));
+      
+      console.log('Active links:', activeLinks);
       setLinks(activeLinks);
     } catch (err) {
       console.error('Error loading profile:', err);
@@ -41,7 +57,9 @@ function PublicProfile() {
   };
 
   const handleLinkClick = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    // Limpiar URL de barras invertidas si quedaron
+    const cleanUrl = url.replace(/\\/g, '');
+    window.open(cleanUrl, '_blank', 'noopener,noreferrer');
   };
 
   if (loading) {
@@ -147,7 +165,7 @@ function PublicProfile() {
                     </h3>
                     <p className="text-gray-400 text-sm truncate flex items-center">
                       <ExternalLink className="w-3 h-3 mr-1 flex-shrink-0" />
-                      {link.url.replace(/^https?:\/\//, '')}
+                      {link.url.replace(/^https?:\/\//, '').replace(/\\/g, '')}
                     </p>
                   </div>
 
