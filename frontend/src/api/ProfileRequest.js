@@ -118,6 +118,7 @@ class ProfileRequest {
    * @param {string} profileData.main_title - Título principal del perfil
    * @param {string} profileData.slug - Slug único del perfil
    * @param {string} profileData.description - Descripción del perfil
+   * @param {string} profileData.theme_name - Nombre del tema del perfil
    * @returns {Promise<Object>} Perfil actualizado
    */
   static async updateProfile(profileId, profileData) {
@@ -129,6 +130,7 @@ class ProfileRequest {
           main_title: profileData.main_title,
           slug: profileData.slug,
           description: profileData.description,
+          theme_name: profileData.theme_name || 'default',
         }),
       });
 

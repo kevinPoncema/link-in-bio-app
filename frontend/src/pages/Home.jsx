@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import AuthRequest from '../api/AuthRequest';
 import ProfileRequest from '../api/ProfileRequest';
 import ProfileCard from '../components/ProfileCard';
-import { LogOut, User, Plus, Loader2 } from 'lucide-react';
+import ProfileForm from '../components/ProfileForm';
+import { LogOut, User, Plus, Loader2, CheckCircle } from 'lucide-react';
 
 function Home() {
   const navigate = useNavigate();
@@ -11,6 +12,10 @@ function Home() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     // Verificar si hay sesión activa
@@ -55,16 +60,45 @@ function Home() {
   const handleDeleteProfile = async (profileId) => {
     try {
       await ProfileRequest.deleteProfile(profileId);
+      setSuccess('Perfil eliminado exitosamente');
       // Recargar la lista de perfiles
       loadProfiles();
+      // Limpiar mensaje de éxito después de 3 segundos
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       setError(err.message || 'Error al eliminar el perfil');
       console.error('Error al eliminar perfil:', err);
+      setTimeout(() => setError(''), 5000);
     }
   };
 
   const handleCreateProfile = () => {
-    navigate('/profile/create');
+    setShowModal(true);
+    setFormError('');
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setFormError('');
+  };
+
+  const handleSubmitProfile = async (formData) => {
+    try {
+      setFormLoading(true);
+      setFormError('');
+      await ProfileRequest.createProfile(formData);
+      setSuccess('¡Perfil creado exitosamente!');
+      setShowModal(false);
+      // Recargar la lista de perfiles
+      loadProfiles();
+      // Limpiar mensaje de éxito después de 3 segundos
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setFormError(err.message || 'Error al crear el perfil');
+      console.error('Error al crear perfil:', err);
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   if (!user) {
@@ -124,6 +158,14 @@ function Home() {
             </div>
           )}
 
+          {/* Mensajes de éxito */}
+          {success && (
+            <div className="flex items-center space-x-2 bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-xl mb-6">
+              <CheckCircle className="w-5 h-5" />
+              <span>{success}</span>
+            </div>
+          )}
+
           {/* Estado de carga */}
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -164,6 +206,15 @@ function Home() {
           )}
         </div>
       </main>
+
+      {/* Modal de Creación de Perfil */}
+      <ProfileForm
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmitProfile}
+        loading={formLoading}
+        error={formError}
+      />
     </div>
   );
 }
