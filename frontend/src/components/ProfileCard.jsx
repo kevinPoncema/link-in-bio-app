@@ -1,0 +1,149 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { MoreVertical, Edit, Trash2, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const ProfileCard = ({ profile, onDelete }) => {
+  const navigate = useNavigate();
+  const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const menuRef = useRef(null);
+
+  // Cerrar menú cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleEdit = () => {
+    setShowMenu(false);
+    navigate(`/profile/edit/${profile.id}`);
+  };
+
+  const handleDeleteClick = () => {
+    setShowMenu(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(profile.id);
+    setShowDeleteConfirm(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  return (
+    <>
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-orange-500 transition-all shadow-lg relative group">
+        {/* Botón de menú de 3 puntos */}
+        <div className="absolute top-4 right-4" ref={menuRef}>
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors text-gray-400 hover:text-white"
+            aria-label="Opciones"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+
+          {/* Menú desplegable */}
+          {showMenu && (
+            <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-lg shadow-xl border border-gray-600 py-2 z-10">
+              <button
+                onClick={handleEdit}
+                className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-600 transition-colors text-left text-white"
+              >
+                <Edit className="w-4 h-4 text-blue-400" />
+                <span>Editar</span>
+              </button>
+              <button
+                onClick={handleDeleteClick}
+                className="w-full flex items-center space-x-3 px-4 py-2 hover:bg-gray-600 transition-colors text-left text-white"
+              >
+                <Trash2 className="w-4 h-4 text-red-400" />
+                <span>Borrar</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Contenido de la tarjeta */}
+        <div className="flex items-start space-x-4">
+          {/* Imagen de perfil o placeholder */}
+          <div className="flex-shrink-0">
+            {profile.profile_picture_url ? (
+              <img
+                src={profile.profile_picture_url}
+                alt={profile.main_title}
+                className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
+                <User className="w-8 h-8 text-white" />
+              </div>
+            )}
+          </div>
+
+          {/* Información del perfil */}
+          <div className="flex-1 min-w-0 pr-8">
+            <h3 className="text-xl font-bold text-white mb-1 truncate">
+              {profile.main_title}
+            </h3>
+            <p className="text-sm text-gray-400 mb-2 line-clamp-2">
+              {profile.description || 'Sin descripción'}
+            </p>
+            <div className="flex items-center space-x-4 text-xs text-gray-500">
+              <span className="flex items-center space-x-1">
+                <span className="font-semibold text-orange-400">Slug:</span>
+                <span className="truncate max-w-[150px]">{profile.slug}</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="font-semibold text-orange-400">Tema:</span>
+                <span>{profile.theme_name}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal de confirmación de eliminación */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700 shadow-2xl">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-900/30">
+              <Trash2 className="w-6 h-6 text-red-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white text-center mb-2">
+              ¿Eliminar perfil?
+            </h3>
+            <p className="text-gray-400 text-center mb-6">
+              ¿Estás seguro de que deseas eliminar el perfil <span className="font-semibold text-white">"{profile.main_title}"</span>? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl font-semibold transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-semibold transition-all shadow-lg"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default ProfileCard;

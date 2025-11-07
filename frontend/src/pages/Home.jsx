@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthRequest from '../api/AuthRequest';
-import { LogOut, User } from 'lucide-react';
+import ProfileRequest from '../api/ProfileRequest';
+import ProfileCard from '../components/ProfileCard';
+import { LogOut, User, Plus, Loader2 } from 'lucide-react';
 
 function Home() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Verificar si hay sesión activa
@@ -17,7 +22,24 @@ function Home() {
     // Obtener datos del usuario
     const userData = AuthRequest.getCurrentUser();
     setUser(userData);
+
+    // Obtener perfiles del usuario
+    loadProfiles();
   }, [navigate]);
+
+  const loadProfiles = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const data = await ProfileRequest.getAllProfiles();
+      setProfiles(data.data || data);
+    } catch (err) {
+      setError(err.message || 'Error al cargar los perfiles');
+      console.error('Error al cargar perfiles:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -28,6 +50,21 @@ function Home() {
       // Redirigir de todas formas
       navigate('/login');
     }
+  };
+
+  const handleDeleteProfile = async (profileId) => {
+    try {
+      await ProfileRequest.deleteProfile(profileId);
+      // Recargar la lista de perfiles
+      loadProfiles();
+    } catch (err) {
+      setError(err.message || 'Error al eliminar el perfil');
+      console.error('Error al eliminar perfil:', err);
+    }
+  };
+
+  const handleCreateProfile = () => {
+    navigate('/profile/create');
   };
 
   if (!user) {
@@ -62,26 +99,69 @@ function Home() {
       </nav>
 
       <main className="container mx-auto p-8">
-        <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
-          <h2 className="text-3xl font-bold mb-4">¡Bienvenido!</h2>
-          <p className="text-gray-400 mb-6">
-            Has iniciado sesión exitosamente en tu aplicación Link in Bio.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gray-700 p-6 rounded-xl">
-              <h3 className="text-xl font-semibold mb-2 text-orange-400">Perfil</h3>
-              <p className="text-gray-300">Gestiona tu información personal</p>
+        {/* Sección de Perfiles */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">Mis Perfiles</h2>
+              <p className="text-gray-400">
+                Gestiona tus perfiles de Link in Bio
+              </p>
             </div>
-            <div className="bg-gray-700 p-6 rounded-xl">
-              <h3 className="text-xl font-semibold mb-2 text-orange-400">Links</h3>
-              <p className="text-gray-300">Administra tus enlaces</p>
-            </div>
-            <div className="bg-gray-700 p-6 rounded-xl">
-              <h3 className="text-xl font-semibold mb-2 text-orange-400">Estadísticas</h3>
-              <p className="text-gray-300">Analiza tus visitas</p>
-            </div>
+            <button
+              onClick={handleCreateProfile}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Crear Perfil</span>
+            </button>
           </div>
+
+          {/* Mensajes de error */}
+          {error && (
+            <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
+              {error}
+            </div>
+          )}
+
+          {/* Estado de carga */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+              <span className="ml-3 text-gray-400">Cargando perfiles...</span>
+            </div>
+          ) : profiles.length === 0 ? (
+            /* Sin perfiles */
+            <div className="bg-gray-800 rounded-2xl p-12 border border-gray-700 text-center">
+              <div className="flex flex-col items-center justify-center space-y-4">
+                <User className="w-16 h-16 text-gray-600" />
+                <h3 className="text-xl font-semibold text-gray-400">
+                  No tienes perfiles aún
+                </h3>
+                <p className="text-gray-500 max-w-md">
+                  Crea tu primer perfil para comenzar a compartir tus enlaces con el mundo
+                </p>
+                <button
+                  onClick={handleCreateProfile}
+                  className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg mt-4"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Crear mi primer perfil</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Lista de perfiles */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {profiles.map((profile) => (
+                <ProfileCard
+                  key={profile.id}
+                  profile={profile}
+                  onDelete={handleDeleteProfile}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

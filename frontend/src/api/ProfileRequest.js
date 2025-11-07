@@ -157,13 +157,32 @@ class ProfileRequest {
         headers: this.getAuthHeaders(),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Error al eliminar el perfil');
+        // Intentar leer el error si hay contenido
+        let errorMessage = 'Error al eliminar el perfil';
+        try {
+          const data = await response.json();
+          errorMessage = data.message || errorMessage;
+        } catch (e) {
+          // Si no hay JSON, usar el mensaje por defecto
+        }
+        throw new Error(errorMessage);
       }
 
-      return data;
+      // Si la respuesta es exitosa pero no tiene contenido (204 No Content)
+      // retornar un objeto de éxito
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return { success: true, message: 'Perfil eliminado exitosamente' };
+      }
+
+      // Si hay contenido, intentar parsearlo
+      try {
+        const data = await response.json();
+        return data;
+      } catch (e) {
+        // Si no se puede parsear, retornar éxito de todas formas
+        return { success: true, message: 'Perfil eliminado exitosamente' };
+      }
     } catch (error) {
       console.error('Error en deleteProfile:', error);
       throw error;
