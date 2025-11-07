@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Loader2, AlertCircle, Link as LinkIcon } from 'lucide-react';
+import { X, Save, Loader2, AlertCircle } from 'lucide-react';
+import IconPicker from './IconPicker';
+import DynamicIcon from './DynamicIcon';
 
 const LinkCreate = ({ 
   isOpen, 
@@ -15,6 +17,8 @@ const LinkCreate = ({
     url: '',
     icon_class: ''
   });
+
+  const [showIconPicker, setShowIconPicker] = useState(false);
 
   // Cargar datos cuando se está editando
   useEffect(() => {
@@ -38,6 +42,13 @@ const LinkCreate = ({
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleIconSelect = (iconKey) => {
+    setFormData(prev => ({
+      ...prev,
+      icon_class: iconKey
     }));
   };
 
@@ -86,7 +97,8 @@ const LinkCreate = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-2xl max-w-lg w-full border border-gray-700 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -155,20 +167,34 @@ const LinkCreate = ({
             {/* Clase de Icono */}
             <div>
               <label htmlFor="icon_class" className="block text-sm font-medium text-gray-300 mb-2">
-                Clase de Icono <span className="text-gray-500">(Opcional)</span>
+                Icono <span className="text-gray-500">(Opcional)</span>
               </label>
-              <input
-                id="icon_class"
-                name="icon_class"
-                type="text"
-                value={formData.icon_class}
-                onChange={handleInputChange}
-                disabled={loading}
-                className="w-full px-4 py-3 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="Ej: fab fa-github"
-              />
+              <button
+                type="button"
+                onClick={() => setShowIconPicker(true)}
+                className="w-full flex items-center justify-between p-4 bg-gray-700 border border-gray-600 rounded-xl hover:bg-gray-600 transition-colors"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
+                    <DynamicIcon 
+                      iconName={formData.icon_class} 
+                      className="w-6 h-6 text-white"
+                    />
+                  </div>
+                  <span className="text-white">
+                    {formData.icon_class ? (
+                      <span className="text-sm">
+                        {formData.icon_class.replace(/^(Fa|Si|Bs|Ai)/, '')}
+                      </span>
+                    ) : (
+                      'Seleccionar icono'
+                    )}
+                  </span>
+                </div>
+                <span className="text-gray-400 text-sm">Cambiar</span>
+              </button>
               <p className="text-xs text-gray-500 mt-2">
-                Clase CSS del icono (FontAwesome, Lucide, etc.)
+                Haz clic para elegir un icono de la galería
               </p>
             </div>
 
@@ -213,6 +239,15 @@ const LinkCreate = ({
         </form>
       </div>
     </div>
+
+      {/* Icon Picker Modal */}
+      <IconPicker
+        isOpen={showIconPicker}
+        onClose={() => setShowIconPicker(false)}
+        selectedIcon={formData.icon_class}
+        onSelectIcon={handleIconSelect}
+      />
+    </>
   );
 };
 

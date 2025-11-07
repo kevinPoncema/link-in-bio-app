@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import LinkRequest from '../api/LinkRequest';
 import LinkCreate from './LinkCreate';
+import DynamicIcon from './DynamicIcon';
 import { 
   Plus,
   GripVertical,
@@ -66,9 +67,12 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
           <GripVertical className="w-5 h-5" />
         </div>
 
-        {/* Order Badge - Icono genérico */}
-        <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
-          <Hash className="w-4 h-4 text-white" />
+        {/* Icon Badge - Muestra el icono dinámico */}
+        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+          <DynamicIcon 
+            iconName={link.icon_class}
+            className="w-6 h-6 text-white"
+          />
         </div>
 
         {/* Link Info */}
@@ -77,11 +81,6 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
             <h4 className="text-white font-semibold truncate">
               {link.title}
             </h4>
-            {link.icon_class && (
-              <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
-                {link.icon_class}
-              </span>
-            )}
           </div>
           <div className="flex items-center space-x-2">
             <ExternalLink className="w-3 h-3 text-gray-500 flex-shrink-0" />
