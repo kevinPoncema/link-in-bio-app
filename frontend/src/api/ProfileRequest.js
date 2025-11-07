@@ -87,15 +87,18 @@ class ProfileRequest {
   }
 
   /**
-   * Obtiene un perfil específico por su ID
-   * @param {number|string} profileId - ID del perfil
+   * Obtiene un perfil específico por su ID o slug (PÚBLICO)
+   * @param {number|string} identifier - ID o slug del perfil
    * @returns {Promise<Object>} Datos del perfil
    */
-  static async getProfileById(profileId) {
+  static async getProfileById(identifier) {
     try {
-      const response = await fetch(`${BASE_URL}/api/profiles/${profileId}`, {
+      const response = await fetch(`${BASE_URL}/api/profiles/${identifier}`, {
         method: 'GET',
-        headers: this.getAuthHeaders(),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
       });
 
       const data = await response.json();
@@ -187,34 +190,6 @@ class ProfileRequest {
       }
     } catch (error) {
       console.error('Error en deleteProfile:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Obtiene un perfil por su slug (público)
-   * @param {string} slug - Slug del perfil
-   * @returns {Promise<Object>} Datos del perfil
-   */
-  static async getProfileBySlug(slug) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/profiles/slug/${slug}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al obtener el perfil');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error en getProfileBySlug:', error);
       throw error;
     }
   }
