@@ -10,7 +10,9 @@ import {
   Link as LinkIcon,
   ExternalLink,
   CheckCircle,
-  XCircle
+  XCircle,
+  Save,
+  Hash
 } from 'lucide-react';
 import {
   DndContext,
@@ -64,11 +66,9 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
           <GripVertical className="w-5 h-5" />
         </div>
 
-        {/* Order Badge */}
+        {/* Order Badge - Icono genérico */}
         <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
-          <span className="text-sm font-bold text-white">
-            {index + 1}
-          </span>
+          <Hash className="w-4 h-4 text-white" />
         </div>
 
         {/* Link Info */}
@@ -134,7 +134,8 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   const [createError, setCreateError] = useState('');
   const [editingLink, setEditingLink] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-  const [reordering, setReordering] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   // Configurar sensores para drag and drop
   const sensors = useSensors(
@@ -189,33 +190,50 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
     const oldIndex = links.findIndex(link => link.id === active.id);
     const newIndex = links.findIndex(link => link.id === over.id);
 
-    // Reordenar localmente primero para feedback inmediato
+    // Reordenar localmente sin recargar
     const newLinks = arrayMove(links, oldIndex, newIndex);
-    setLinks(newLinks);
-
+    
     // Actualizar los valores de order
     const updatedLinks = newLinks.map((link, index) => ({
-      id: link.id,
+      ...link,
       order: index + 1
     }));
+    
+    setLinks(updatedLinks);
+    setHasUnsavedChanges(true);
 
+    if (onLinksChange) {
+      onLinksChange(updatedLinks);
+    }
+  };
+
+  // Guardar el orden manualmente
+  const handleSaveOrder = async () => {
     try {
-      setReordering(true);
+      setSavingOrder(true);
+      setError('');
+      
+      // Preparar datos asegurando que se incluyan todos los campos necesarios
+      const updatedLinks = links.map((link, index) => ({
+        id: link.id,
+        order: index + 1,
+        title: link.title,
+        url: link.url,
+        icon_class: link.icon_class || null,
+        is_active: link.is_active
+      }));
+
       await LinkRequest.updateLinksOrder(updatedLinks);
-      setSuccess('¡Orden actualizado exitosamente!');
+      
+      setSuccess('¡Orden guardado exitosamente!');
+      setHasUnsavedChanges(false);
       setTimeout(() => setSuccess(''), 3000);
-      
-      // Recargar para sincronizar con el servidor
-      loadLinks();
     } catch (err) {
-      setError(err.message || 'Error al actualizar el orden');
-      console.error('Error al reordenar:', err);
+      setError(err.message || 'Error al guardar el orden');
+      console.error('Error al guardar orden:', err);
       setTimeout(() => setError(''), 5000);
-      
-      // Revertir cambios en caso de error
-      loadLinks();
     } finally {
-      setReordering(false);
+      setSavingOrder(false);
     }
   };
 
@@ -320,13 +338,34 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
             </p>
           )}
         </div>
-        <button
-          onClick={handleAddLink}
-          className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Agregar Link</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          {hasUnsavedChanges && (
+            <button
+              onClick={handleSaveOrder}
+              disabled={savingOrder}
+              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {savingOrder ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  <span>Guardar Orden</span>
+                </>
+              )}
+            </button>
+          )}
+          <button
+            onClick={handleAddLink}
+            className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Agregar Link</span>
+          </button>
+        </div>
       </div>
 
       {/* Mensajes */}
@@ -365,10 +404,10 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
           </div>
         ) : (
           <>
-            {reordering && (
-              <div className="flex items-center space-x-2 bg-blue-900/20 border border-blue-700/30 text-blue-300 px-4 py-3 rounded-xl mb-4">
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Actualizando orden...</span>
+            {hasUnsavedChanges && (
+              <div className="flex items-center space-x-2 bg-yellow-900/20 border border-yellow-700/30 text-yellow-300 px-4 py-3 rounded-xl mb-4">
+                <XCircle className="w-5 h-5" />
+                <span>Tienes cambios sin guardar. Haz clic en "Guardar Orden" para aplicar los cambios.</span>
               </div>
             )}
             
@@ -398,15 +437,6 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
           </>
         )}
       </div>
-
-      {/* Info de reordenamiento */}
-      {links.length > 0 && (
-        <div className="mt-4 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg">
-          <p className="text-xs text-blue-300">
-            💡 <span className="font-semibold">Arrastra y suelta</span> para reordenar los links. Los cambios se guardan automáticamente.
-          </p>
-        </div>
-      )}
 
       {/* Modal de Creación/Edición */}
       <LinkCreate

@@ -208,14 +208,20 @@ class LinkRequest {
 
   /**
    * Actualiza el orden de múltiples links
-   * @param {Array} linksOrder - Array de objetos con id y order
+   * @param {Array} linksOrder - Array de objetos con todos los datos del link
    * @returns {Promise<Object>} Respuesta del servidor
    */
   static async updateLinksOrder(linksOrder) {
     try {
-      // Este endpoint necesitará ser implementado en el backend
+      // Actualizar cada link con todos sus datos para preservar el icon_class
       const promises = linksOrder.map(link => 
-        this.updateLink(link.id, { order: link.order })
+        this.updateLink(link.id, {
+          title: link.title,
+          url: link.url,
+          icon_class: link.icon_class,
+          order: link.order,
+          is_active: link.is_active
+        })
       );
       
       await Promise.all(promises);
