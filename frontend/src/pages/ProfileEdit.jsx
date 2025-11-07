@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AuthRequest from '../api/AuthRequest';
 import ProfileRequest from '../api/ProfileRequest';
 import ThemeSelector from '../components/ThemeSelector';
+import LinkList from '../components/LinkList';
 import { 
   ArrowLeft, 
   Loader2, 
@@ -10,12 +11,7 @@ import {
   User, 
   Camera, 
   CheckCircle,
-  AlertCircle,
-  Link as LinkIcon,
-  Plus,
-  GripVertical,
-  Edit2,
-  Trash2
+  AlertCircle
 } from 'lucide-react';
 
 function ProfileEdit() {
@@ -35,9 +31,6 @@ function ProfileEdit() {
     theme_name: 'default',
   });
   const [slugEdited, setSlugEdited] = useState(false);
-
-  // Estado para los links (próxima implementación)
-  const [links, setLinks] = useState([]);
 
   useEffect(() => {
     // Verificar si hay sesión activa
@@ -66,10 +59,6 @@ function ProfileEdit() {
         theme_name: profileData.theme_name || 'default',
       });
       setSlugEdited(true);
-      
-      // TODO: Cargar links del perfil
-      // const linksData = await LinkRequest.getLinksByProfile(id);
-      // setLinks(linksData);
       
     } catch (err) {
       setError(err.message || 'Error al cargar el perfil');
@@ -344,58 +333,14 @@ function ProfileEdit() {
 
           {/* Columna Derecha - Gestión de Links */}
           <div className="lg:col-span-2">
-            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-xl font-bold">Links del Perfil</h2>
-                  <p className="text-sm text-gray-400 mt-1">
-                    Gestiona y ordena tus enlaces
-                  </p>
-                </div>
-                <button
-                  disabled
-                  className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-                  title="Próximamente"
-                >
-                  <Plus className="w-5 h-5" />
-                  <span>Agregar Link</span>
-                </button>
-              </div>
-
-              {/* Lista de Links (Placeholder) */}
-              <div className="space-y-3">
-                {links.length === 0 ? (
-                  <div className="text-center py-12">
-                    <LinkIcon className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-400 mb-2">
-                      No hay links aún
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      La gestión de links estará disponible próximamente
-                    </p>
-                  </div>
-                ) : (
-                  links.map((link, index) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center space-x-3 bg-gray-700 p-4 rounded-xl border border-gray-600 hover:border-orange-500 transition-all"
-                    >
-                      <GripVertical className="w-5 h-5 text-gray-500 cursor-move" />
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{link.title}</h4>
-                        <p className="text-sm text-gray-400 truncate">{link.url}</p>
-                      </div>
-                      <button className="p-2 hover:bg-gray-600 rounded-lg transition-colors">
-                        <Edit2 className="w-4 h-4 text-blue-400" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-600 rounded-lg transition-colors">
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <LinkList 
+              profileId={id} 
+              themeName={formData.theme_name}
+              onLinksChange={(links) => {
+                // Callback opcional si necesitas saber cuándo cambian los links
+                console.log('Links actualizados:', links.length);
+              }}
+            />
           </div>
         </div>
       </main>
