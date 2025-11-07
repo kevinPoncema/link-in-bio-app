@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import LinkRequest from '../api/LinkRequest';
+import LinkCreate from './LinkCreate';
 import { 
   Plus,
   GripVertical,
@@ -17,6 +18,11 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [editingLink, setEditingLink] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     if (profileId) {
@@ -46,13 +52,62 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   };
 
   const handleDeleteLink = async (linkId) => {
-    if (!confirm('¿Estás seguro de eliminar este link?')) return;
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este link?')) {
+      return;
+    }
 
     try {
-      setError('');
-      setSuccess('');
+      setDeletingId(linkId);
       await LinkRequest.deleteLink(linkId);
-      setSuccess('Link eliminado exitosamente');
+      
+      setSuccess('¡Link eliminado exitosamente!');
+      loadLinks();
+      
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message || 'Error al eliminar el link');
+      console.error('Error al eliminar link:', err);
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleEditLink = (link) => {
+    setEditingLink(link);
+    setShowCreateModal(true);
+    setCreateError('');
+  };
+
+  const handleAddLink = () => {
+    setEditingLink(null);
+    setShowCreateModal(true);
+    setCreateError('');
+  };
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false);
+    setEditingLink(null);
+    setCreateError('');
+  };
+
+  const handleCreateLink = async (linkData) => {
+    try {
+      setCreateLoading(true);
+      setCreateError('');
+      
+      if (editingLink) {
+        // Actualizar link existente
+        await LinkRequest.updateLink(linkData.id, linkData);
+        setSuccess('¡Link actualizado exitosamente!');
+      } else {
+        // Crear nuevo link
+        await LinkRequest.createLink(linkData);
+        setSuccess('¡Link creado exitosamente!');
+      }
+      
+      setShowCreateModal(false);
+      setEditingLink(null);
       
       // Recargar la lista de links
       loadLinks();
@@ -60,22 +115,11 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
       // Limpiar mensaje después de 3 segundos
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.message || 'Error al eliminar el link');
-      console.error('Error al eliminar link:', err);
-      setTimeout(() => setError(''), 5000);
+      setCreateError(err.message || `Error al ${editingLink ? 'actualizar' : 'crear'} el link`);
+      console.error('Error:', err);
+    } finally {
+      setCreateLoading(false);
     }
-  };
-
-  const handleEditLink = (link) => {
-    // TODO: Implementar modal de edición
-    console.log('Editar link:', link);
-    alert('La edición de links estará disponible próximamente');
-  };
-
-  const handleAddLink = () => {
-    // TODO: Implementar modal de creación
-    console.log('Agregar nuevo link');
-    alert('La creación de links estará disponible próximamente');
   };
 
   if (loading) {
@@ -194,17 +238,23 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => handleEditLink(link)}
-                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
+                  disabled={deletingId === link.id}
+                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Editar link"
                 >
                   <Edit2 className="w-4 h-4 text-blue-400" />
                 </button>
                 <button
                   onClick={() => handleDeleteLink(link.id)}
-                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
+                  disabled={deletingId === link.id}
+                  className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Eliminar link"
                 >
-                  <Trash2 className="w-4 h-4 text-red-400" />
+                  {deletingId === link.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 text-red-400" />
+                  )}
                 </button>
               </div>
             </div>
@@ -220,6 +270,17 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
           </p>
         </div>
       )}
+
+      {/* Modal de Creación/Edición */}
+      <LinkCreate
+        isOpen={showCreateModal}
+        onClose={handleCloseCreateModal}
+        onSubmit={handleCreateLink}
+        profileId={profileId}
+        loading={createLoading}
+        error={createError}
+        editingLink={editingLink}
+      />
     </div>
   );
 };
