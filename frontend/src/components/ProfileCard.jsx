@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreVertical, Edit, Trash2, User } from 'lucide-react';
+import { MoreVertical, Edit, Trash2, User, Share2, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import QRModal from './QRModal';
 
 const ProfileCard = ({ profile, onDelete }) => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showCopyFeedback, setShowCopyFeedback] = useState(false);
   const menuRef = useRef(null);
 
   // Cerrar menú cuando se hace clic fuera
@@ -37,6 +40,43 @@ const ProfileCard = ({ profile, onDelete }) => {
 
   const handleCancelDelete = () => {
     setShowDeleteConfirm(false);
+  };
+
+  const handleShareProfile = () => {
+    const profileURL = `${window.location.origin}/${profile.slug}`;
+    
+    // Intentar copiar al portapapeles
+    navigator.clipboard.writeText(profileURL)
+      .then(() => {
+        // Mostrar feedback visual
+        setShowCopyFeedback(true);
+        setTimeout(() => {
+          setShowCopyFeedback(false);
+        }, 2000);
+      })
+      .catch(err => {
+        console.error('Error al copiar al portapapeles:', err);
+        // Fallback: crear un input temporal
+        const tempInput = document.createElement('input');
+        tempInput.value = profileURL;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        
+        setShowCopyFeedback(true);
+        setTimeout(() => {
+          setShowCopyFeedback(false);
+        }, 2000);
+      });
+  };
+
+  const handleOpenQRModal = () => {
+    setShowQRModal(true);
+  };
+
+  const handleCloseQRModal = () => {
+    setShowQRModal(false);
   };
 
   return (
@@ -98,7 +138,7 @@ const ProfileCard = ({ profile, onDelete }) => {
             <p className="text-sm text-gray-400 mb-2 line-clamp-2">
               {profile.description || 'Sin descripción'}
             </p>
-            <div className="flex items-center space-x-4 text-xs text-gray-500">
+            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
               <span className="flex items-center space-x-1">
                 <span className="font-semibold text-orange-400">Slug:</span>
                 <span className="truncate max-w-[150px]">{profile.slug}</span>
@@ -107,6 +147,36 @@ const ProfileCard = ({ profile, onDelete }) => {
                 <span className="font-semibold text-orange-400">Tema:</span>
                 <span>{profile.theme_name}</span>
               </span>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="flex items-center space-x-2 mt-3">
+              {/* Botón Compartir */}
+              <button
+                onClick={handleShareProfile}
+                className="relative flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-all shadow-md"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Compartir</span>
+              </button>
+
+              {/* Botón QR */}
+              <button
+                onClick={handleOpenQRModal}
+                className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-all shadow-md"
+              >
+                <QrCode className="w-4 h-4" />
+                <span>QR</span>
+              </button>
+
+              {/* Feedback de copiado */}
+              {showCopyFeedback && (
+                <div className="absolute left-0 right-0 -bottom-8 flex justify-center">
+                  <div className="bg-green-500 text-white px-4 py-1 rounded-lg text-xs font-semibold shadow-lg">
+                    ¡Enlace copiado!
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -142,6 +212,14 @@ const ProfileCard = ({ profile, onDelete }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de QR */}
+      <QRModal 
+        isOpen={showQRModal}
+        onClose={handleCloseQRModal}
+        url={`${window.location.origin}/${profile.slug}`}
+        profileName={profile.main_title}
+      />
     </>
   );
 };
