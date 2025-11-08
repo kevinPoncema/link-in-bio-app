@@ -7,15 +7,16 @@ import ThemeProvider, { useThemeColors } from '../components/ThemeProvider';
 import LinkList from '../components/LinkList';
 import { 
   ArrowLeft, 
-  Loader2, 
   Save, 
-  User, 
-  Camera, 
-  CheckCircle,
-  AlertCircle,
+  Loader2, 
+  AlertCircle, 
+  CheckCircle, 
+  Camera,
+  User,
   Upload,
   X as XIcon
 } from 'lucide-react';
+import { getFullImageUrl, validateImageFile, fileToBase64 } from '../utils/imageHelpers';
 
 function ProfileEdit() {
   const navigate = useNavigate();
@@ -65,7 +66,8 @@ function ProfileEdit() {
         theme_name: profileData.theme_name || 'default',
         profile_picture: profileData.profile_picture_url || '',
       });
-      setImagePreview(profileData.profile_picture_url || null);
+      // Usar el helper para obtener la URL completa
+      setImagePreview(getFullImageUrl(profileData.profile_picture_url));
       setSlugEdited(true);
       
     } catch (err) {
@@ -118,34 +120,29 @@ function ProfileEdit() {
     }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Validar que sea una imagen
-      if (!file.type.startsWith('image/')) {
-        setError('Por favor selecciona un archivo de imagen válido');
-        setTimeout(() => setError(''), 3000);
-        return;
-      }
+    if (!file) return;
 
-      // Validar tamaño (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError('La imagen es muy grande. El tamaño máximo es 5MB');
-        setTimeout(() => setError(''), 3000);
-        return;
-      }
+    // Validar la imagen
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setError(validation.error);
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
 
-      // Leer la imagen y convertirla a base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setImagePreview(base64String);
-        setFormData(prev => ({
-          ...prev,
-          profile_picture: base64String,
-        }));
-      };
-      reader.readAsDataURL(file);
+    try {
+      // Convertir a base64
+      const base64String = await fileToBase64(file);
+      setImagePreview(base64String);
+      setFormData(prev => ({
+        ...prev,
+        profile_picture: base64String,
+      }));
+    } catch (err) {
+      setError('Error al procesar la imagen');
+      setTimeout(() => setError(''), 3000);
     }
   };
 

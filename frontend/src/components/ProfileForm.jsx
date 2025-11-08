@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, Loader2, AlertCircle, Upload, User } from 'lucide-react';
+import { getFullImageUrl, validateImageFile, fileToBase64 } from '../utils/imageHelpers';
 
 const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = false, error = '' }) => {
   const [formData, setFormData] = useState({
@@ -20,7 +21,8 @@ const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = 
         description: initialData.description || '',
         profile_picture: initialData.profile_picture_url || '',
       });
-      setImagePreview(initialData.profile_picture_url || null);
+      // Usar el helper para obtener la URL completa
+      setImagePreview(getFullImageUrl(initialData.profile_picture_url));
       setSlugEdited(true); // Si hay datos iniciales, consideramos que el slug ya fue editado
     } else {
       setFormData({
@@ -70,32 +72,27 @@ const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = 
     }
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      // Validar que sea una imagen
-      if (!file.type.startsWith('image/')) {
-        alert('Por favor selecciona un archivo de imagen válido');
-        return;
-      }
+    if (!file) return;
 
-      // Validar tamaño (máximo 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('La imagen es muy grande. El tamaño máximo es 5MB');
-        return;
-      }
+    // Validar la imagen
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
 
-      // Leer la imagen y convertirla a base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        setImagePreview(base64String);
-        setFormData(prev => ({
-          ...prev,
-          profile_picture: base64String,
-        }));
-      };
-      reader.readAsDataURL(file);
+    try {
+      // Convertir a base64
+      const base64String = await fileToBase64(file);
+      setImagePreview(base64String);
+      setFormData(prev => ({
+        ...prev,
+        profile_picture: base64String,
+      }));
+    } catch (err) {
+      alert('Error al procesar la imagen');
     }
   };
 

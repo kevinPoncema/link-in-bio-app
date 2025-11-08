@@ -6,6 +6,7 @@ import DynamicIcon from '../components/DynamicIcon';
 import ThemeProvider, { useThemeColors } from '../components/ThemeProvider';
 import Watermark from '../components/Watermark';
 import { Loader2, User, ExternalLink, AlertCircle } from 'lucide-react';
+import { getFullImageUrl } from '../utils/imageHelpers';
 
 function PublicProfile() {
   const { slug } = useParams();
@@ -111,7 +112,7 @@ function PublicProfile() {
             <div className="mb-6">
               {profile.profile_picture_url ? (
                 <img
-                  src={profile.profile_picture_url}
+                  src={getFullImageUrl(profile.profile_picture_url)}
                   alt={profile.main_title}
                   className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto object-cover border-4 shadow-xl"
                   style={{ borderColor: themeColors.primary }}

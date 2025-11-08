@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MoreVertical, Edit, Trash2, User, Share2, QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import QRModal from './QRModal';
+import { getFullImageUrl } from '../utils/imageHelpers';
 
 const ProfileCard = ({ profile, onDelete }) => {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ const ProfileCard = ({ profile, onDelete }) => {
           <div className="flex-shrink-0">
             {profile.profile_picture_url ? (
               <img
-                src={profile.profile_picture_url}
+                src={getFullImageUrl(profile.profile_picture_url)}
                 alt={profile.main_title}
                 className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
               />
