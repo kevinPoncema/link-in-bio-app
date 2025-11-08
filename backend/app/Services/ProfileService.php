@@ -34,48 +34,109 @@ class ProfileService
 
         // Eliminar la imagen anterior si existe
         if ($oldImageUrl) {
-            // Limpiar la URL de barras escapadas
-            $oldImageUrl = $this->cleanUrl($oldImageUrl);
-            $oldPath = str_replace([url('/storage/'), asset('storage/'), '/storage/'], '', $oldImageUrl);
-            if (Storage::disk('public')->exists($oldPath)) {
-                Storage::disk('public')->delete($oldPath);
-            }
+            $this->deleteOldImage($oldImageUrl);
         }
 
         // Caso 1: Imagen en base64
         if (is_string($imageData) && Str::startsWith($imageData, 'data:image')) {
-            // Extraer el tipo de imagen y los datos
-            preg_match('/data:image\/(\w+);base64,(.*)/', $imageData, $matches);
-            
-            if (count($matches) === 3) {
-                $extension = $matches[1]; // jpg, png, etc.
-                $imageContent = base64_decode($matches[2]);
-                
-                // Generar nombre único
-                $fileName = time() . '_' . Str::random(10) . '.' . $extension;
-                $imagePath = 'profile_pictures/' . $fileName;
-                
-                // Guardar la imagen
-                Storage::disk('public')->put($imagePath, $imageContent);
-                
-                // Retornar solo la ruta relativa sin escapar
-                return 'storage/profile_pictures/' . $fileName;
-            }
+            return $this->saveBase64Image($imageData);
         }
 
         // Caso 2: Archivo subido directamente (UploadedFile)
         if (is_object($imageData) && method_exists($imageData, 'getClientOriginalExtension')) {
-            $fileName = time() . '_' . Str::random(10) . '.' . $imageData->getClientOriginalExtension();
-            $imagePath = 'profile_pictures/' . $fileName;
-            
-            // Guardar el archivo
-            Storage::disk('public')->put($imagePath, file_get_contents($imageData));
-            
-            // Retornar solo la ruta relativa sin escapar
-            return 'storage/profile_pictures/' . $fileName;
+            return $this->saveUploadedFile($imageData);
         }
 
         return null;
+    }
+
+    /**
+     * Guarda una imagen desde base64
+     *
+     * @param string $base64Data
+     * @return string|null
+     */
+    protected function saveBase64Image(string $base64Data): ?string
+    {
+        // Extraer el tipo de imagen y los datos
+        preg_match('/data:image\/(\w+);base64,(.*)/', $base64Data, $matches);
+        
+        if (count($matches) !== 3) {
+            return null;
+        }
+
+        $extension = $matches[1]; // jpg, png, gif, etc.
+        $imageContent = base64_decode($matches[2]);
+        
+        // Generar nombre único
+        $fileName = time() . '_' . Str::random(10) . '.' . $extension;
+        $storagePath = 'profile_pictures/' . $fileName;
+        
+        // Guardar la imagen en storage/app/public/profile_pictures/
+        Storage::disk('public')->put($storagePath, $imageContent);
+        
+        // Retornar la URL completa con el dominio del backend
+        return $this->getImageUrl($fileName);
+    }
+
+    /**
+     * Guarda un archivo subido directamente
+     *
+     * @param mixed $file
+     * @return string|null
+     */
+    protected function saveUploadedFile($file): ?string
+    {
+        $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+        $storagePath = 'profile_pictures/' . $fileName;
+        
+        // Guardar el archivo en storage/app/public/profile_pictures/
+        Storage::disk('public')->put($storagePath, file_get_contents($file));
+        
+        // Retornar la URL completa con el dominio del backend
+        return $this->getImageUrl($fileName);
+    }
+
+    /**
+     * Construye la URL completa de la imagen
+     *
+     * @param string $fileName
+     * @return string
+     */
+    protected function getImageUrl(string $fileName): string
+    {
+        // Obtener la URL base del backend desde config
+        $baseUrl = rtrim(config('app.url'), '/');
+        
+        // Construir la URL completa: http://localhost:8000/storage/profile_pictures/filename.jpg
+        return $baseUrl . '/storage/profile_pictures/' . $fileName;
+    }
+
+    /**
+     * Elimina una imagen antigua del storage
+     *
+     * @param string $imageUrl
+     * @return void
+     */
+    protected function deleteOldImage(string $imageUrl): void
+    {
+        try {
+            // Extraer solo el nombre del archivo de la URL
+            // Ej: http://localhost:8000/storage/profile_pictures/123_abc.jpg -> 123_abc.jpg
+            $parts = explode('/storage/profile_pictures/', $imageUrl);
+            
+            if (count($parts) === 2) {
+                $fileName = $parts[1];
+                $storagePath = 'profile_pictures/' . $fileName;
+                
+                if (Storage::disk('public')->exists($storagePath)) {
+                    Storage::disk('public')->delete($storagePath);
+                }
+            }
+        } catch (\Exception $e) {
+            // Log el error pero no detener la ejecución
+            \Log::warning('Error al eliminar imagen antigua: ' . $e->getMessage());
+        }
     }
 
     /**
