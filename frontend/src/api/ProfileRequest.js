@@ -35,6 +35,7 @@ class ProfileRequest {
    * @param {string} profileData.main_title - Título principal del perfil
    * @param {string} profileData.slug - Slug único del perfil
    * @param {string} profileData.description - Descripción del perfil
+   * @param {string} profileData.profile_picture - URL o base64 de la imagen de perfil
    * @returns {Promise<Object>} Perfil creado
    */
   static async createProfile(profileData) {
@@ -46,6 +47,7 @@ class ProfileRequest {
           main_title: profileData.main_title,
           slug: profileData.slug,
           description: profileData.description,
+          profile_picture: profileData.profile_picture || null,
         }),
       });
 
@@ -122,6 +124,7 @@ class ProfileRequest {
    * @param {string} profileData.slug - Slug único del perfil
    * @param {string} profileData.description - Descripción del perfil
    * @param {string} profileData.theme_name - Nombre del tema del perfil
+   * @param {string} profileData.profile_picture - URL o base64 de la imagen de perfil
    * @returns {Promise<Object>} Perfil actualizado
    */
   static async updateProfile(profileId, profileData) {
@@ -134,6 +137,7 @@ class ProfileRequest {
           slug: profileData.slug,
           description: profileData.description,
           theme_name: profileData.theme_name || 'default',
+          profile_picture: profileData.profile_picture || null,
         }),
       });
 

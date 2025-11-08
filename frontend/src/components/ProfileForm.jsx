@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, Loader2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, Loader2, AlertCircle, Upload, User } from 'lucide-react';
 
 const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = false, error = '' }) => {
   const [formData, setFormData] = useState({
     main_title: '',
     slug: '',
     description: '',
+    profile_picture: '',
   });
   const [slugEdited, setSlugEdited] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (initialData) {
@@ -15,14 +18,18 @@ const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = 
         main_title: initialData.main_title || '',
         slug: initialData.slug || '',
         description: initialData.description || '',
+        profile_picture: initialData.profile_picture_url || '',
       });
+      setImagePreview(initialData.profile_picture_url || null);
       setSlugEdited(true); // Si hay datos iniciales, consideramos que el slug ya fue editado
     } else {
       setFormData({
         main_title: '',
         slug: '',
         description: '',
+        profile_picture: '',
       });
+      setImagePreview(null);
       setSlugEdited(false);
     }
   }, [initialData, isOpen]);
@@ -61,6 +68,50 @@ const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = 
         [name]: value,
       }));
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen es muy grande. El tamaño máximo es 5MB');
+        return;
+      }
+
+      // Leer la imagen y convertirla a base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        setImagePreview(base64String);
+        setFormData(prev => ({
+          ...prev,
+          profile_picture: base64String,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({
+      ...prev,
+      profile_picture: '',
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSubmit = (e) => {
@@ -105,6 +156,75 @@ const ProfileForm = ({ isOpen, onClose, onSubmit, initialData = null, loading = 
           )}
 
           <div className="space-y-5">
+            {/* Imagen de Perfil */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Imagen de Perfil
+              </label>
+              <div className="flex flex-col items-center space-y-3">
+                {/* Preview de la imagen */}
+                <div 
+                  className="relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group border-4 border-gray-600 hover:border-orange-500 transition-all"
+                  onClick={handleImageClick}
+                >
+                  {imagePreview ? (
+                    <>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center">
+                        <Upload className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center">
+                      <div className="text-center">
+                        <User className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                        <Upload className="w-6 h-6 text-gray-400 mx-auto" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input oculto */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  disabled={loading}
+                />
+
+                {/* Botones */}
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleImageClick}
+                    disabled={loading}
+                    className="px-4 py-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white text-sm rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {imagePreview ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
+                  </button>
+                  {imagePreview && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      disabled={loading}
+                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Quitar
+                    </button>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 text-center">
+                  Formatos: JPG, PNG, GIF. Máximo 5MB
+                </p>
+              </div>
+            </div>
+
             {/* Título Principal */}
             <div>
               <label htmlFor="main_title" className="block text-sm font-medium text-gray-300 mb-2">

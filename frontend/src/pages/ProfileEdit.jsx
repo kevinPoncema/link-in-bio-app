@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AuthRequest from '../api/AuthRequest';
 import ProfileRequest from '../api/ProfileRequest';
@@ -12,7 +12,9 @@ import {
   User, 
   Camera, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Upload,
+  X as XIcon
 } from 'lucide-react';
 
 function ProfileEdit() {
@@ -30,8 +32,11 @@ function ProfileEdit() {
     slug: '',
     description: '',
     theme_name: 'default',
+    profile_picture: '',
   });
   const [slugEdited, setSlugEdited] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     // Verificar si hay sesión activa
@@ -58,7 +63,9 @@ function ProfileEdit() {
         slug: profileData.slug || '',
         description: profileData.description || '',
         theme_name: profileData.theme_name || 'default',
+        profile_picture: profileData.profile_picture_url || '',
       });
+      setImagePreview(profileData.profile_picture_url || null);
       setSlugEdited(true);
       
     } catch (err) {
@@ -109,6 +116,52 @@ function ProfileEdit() {
       ...prev,
       theme_name: themeName,
     }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('La imagen es muy grande. El tamaño máximo es 5MB');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+
+      // Leer la imagen y convertirla a base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        setImagePreview(base64String);
+        setFormData(prev => ({
+          ...prev,
+          profile_picture: base64String,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({
+      ...prev,
+      profile_picture: '',
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSaveProfile = async (e) => {
@@ -233,9 +286,14 @@ function ProfileEdit() {
                 formData={formData}
                 slugEdited={slugEdited}
                 saving={saving}
+                imagePreview={imagePreview}
+                fileInputRef={fileInputRef}
                 onInputChange={handleInputChange}
                 onThemeChange={handleThemeChange}
                 onSaveProfile={handleSaveProfile}
+                onImageChange={handleImageChange}
+                onRemoveImage={handleRemoveImage}
+                onImageClick={handleImageClick}
               />
             </div>
 
@@ -261,10 +319,15 @@ const ProfileFormSection = ({
   profile, 
   formData, 
   slugEdited, 
-  saving, 
+  saving,
+  imagePreview,
+  fileInputRef,
   onInputChange, 
   onThemeChange, 
-  onSaveProfile 
+  onSaveProfile,
+  onImageChange,
+  onRemoveImage,
+  onImageClick
 }) => {
   const themeColors = useThemeColors(formData.theme_name);
 
@@ -277,37 +340,72 @@ const ProfileFormSection = ({
       
       {/* Imagen de Perfil */}
       <div className="flex flex-col items-center mb-6">
-        <div className="relative group">
-          {profile?.profile_picture_url ? (
-            <img
-              src={profile.profile_picture_url}
-              alt={profile.main_title}
-              className="w-32 h-32 rounded-full object-cover border-4 shadow-xl"
-              style={{ borderColor: themeColors.primary }}
-            />
+        <div 
+          className="relative w-32 h-32 rounded-full overflow-hidden cursor-pointer group border-4 transition-all"
+          style={{ borderColor: themeColors.primary }}
+          onClick={onImageClick}
+        >
+          {imagePreview ? (
+            <>
+              <img
+                src={imagePreview}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all flex items-center justify-center">
+                <Camera className="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </>
           ) : (
             <div 
-              className="w-32 h-32 rounded-full flex items-center justify-center border-4 shadow-xl"
+              className="w-full h-full flex items-center justify-center"
               style={{ 
                 background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-                borderColor: themeColors.primary
               }}
             >
-              <User className="w-16 h-16 text-white" />
+              <div className="text-center">
+                <User className="w-12 h-12 text-white mx-auto mb-2" />
+                <Upload className="w-6 h-6 text-white mx-auto opacity-70" />
+              </div>
             </div>
           )}
-          <button
-            disabled
-            className="absolute bottom-0 right-0 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
-            title="Próximamente: Subir foto"
-          >
-            <Camera className="w-4 h-4 text-white" />
-          </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          La subida de imágenes estará disponible próximamente
-        </p>
+
+        {/* Input oculto */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={onImageChange}
+          className="hidden"
+          disabled={saving}
+        />
+
+        {/* Botones de imagen */}
+        <div className="flex space-x-2 mt-4">
+          <button
+            type="button"
+            onClick={onImageClick}
+            disabled={saving}
+            className="px-4 py-2 text-sm rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ 
+              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+              color: 'white'
+            }}
+          >
+            {imagePreview ? 'Cambiar' : 'Subir Foto'}
+          </button>
+          {imagePreview && (
+            <button
+              type="button"
+              onClick={onRemoveImage}
+              disabled={saving}
+              className="px-4 py-2 bg-gray-700/80 hover:bg-gray-600/80 text-white text-sm rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Quitar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Formulario de Perfil */}
