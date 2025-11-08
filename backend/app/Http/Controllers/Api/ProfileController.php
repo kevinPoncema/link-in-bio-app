@@ -24,7 +24,7 @@ class ProfileController extends Controller
         if ($profiles->isEmpty()) {
             return response()->json(['message' => 'No se encontraron perfiles para este usuario.'], 404);
         }
-        return response()->json($profiles);
+        return response()->json($profiles, 200, [], JSON_UNESCAPED_SLASHES);
     }
 
     public function store(Request $request): JsonResponse
@@ -36,16 +36,16 @@ class ProfileController extends Controller
             'main_title' => 'required|string|max:255',
             'slug' => 'required|string|unique:profiles|max:255',
             'description' => 'nullable|string',
-            'profile_picture_url' => 'nullable|url',
+            'profile_picture' => 'nullable|string', // Base64 string o archivo
             'theme_name' => 'nullable|string|max:50',
         ]);
 
-        $data = $request->only('profile_picture_url', 'main_title', 'description', 'slug', 'theme_name');
+        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_name');
         $data['user_id'] = $userId; // Asignar el ID del usuario autenticado
         
         $profile = $this->profileService->createProfile($data);
 
-        return response()->json($profile, 201);
+        return response()->json($profile, 201, [], JSON_UNESCAPED_SLASHES);
     }
 
 
@@ -65,7 +65,7 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Perfil no encontrado.'], 404);
         }
 
-        return response()->json($profile);
+        return response()->json($profile, 200, [], JSON_UNESCAPED_SLASHES);
     }
   
     public function update(Request $request, int $id): JsonResponse
@@ -73,9 +73,10 @@ class ProfileController extends Controller
         $request->validate([
             'main_title' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|max:255|unique:profiles,slug,'.$id,
+            'profile_picture' => 'nullable|string', // Base64 string o archivo
         ]);
 
-        $data = $request->only('profile_picture_url', 'main_title', 'description', 'slug', 'theme_name');
+        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_name');
 
         $profile = $this->profileService->updateProfileById($id, $data);
 
@@ -83,7 +84,7 @@ class ProfileController extends Controller
             return response()->json(['message' => 'Perfil no encontrado para actualizar.'], 404);
         }
 
-        return response()->json($profile);
+        return response()->json($profile, 200, [], JSON_UNESCAPED_SLASHES);
     }
     
     public function destroy(int $id): JsonResponse
