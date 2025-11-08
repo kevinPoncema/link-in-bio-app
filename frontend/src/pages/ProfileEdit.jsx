@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AuthRequest from '../api/AuthRequest';
 import ProfileRequest from '../api/ProfileRequest';
 import ThemeSelector from '../components/ThemeSelector';
+import ThemeProvider, { useThemeColors } from '../components/ThemeProvider';
 import LinkList from '../components/LinkList';
 import { 
   ArrowLeft, 
@@ -11,7 +12,8 @@ import {
   User, 
   Camera, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react';
 
 function ProfileEdit() {
@@ -22,6 +24,7 @@ function ProfileEdit() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
   
   // Estado para los datos del formulario de perfil
   const [formData, setFormData] = useState({
@@ -185,167 +188,232 @@ function ProfileEdit() {
               Editar Perfil
             </h1>
           </div>
-          <button
-            onClick={handleSaveProfile}
-            disabled={saving}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Guardando...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-5 h-5" />
-                <span>Guardar Cambios</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Botón Vista Previa */}
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold transition-all ${
+                showPreview 
+                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' 
+                  : 'bg-gray-700 hover:bg-gray-600'
+              }`}
+            >
+              <Eye className="w-5 h-5" />
+              <span>{showPreview ? 'Ocultar' : 'Vista'} Previa</span>
+            </button>
+            
+            {/* Botón Guardar */}
+            <button
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  <span>Guardar</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="container mx-auto p-8 max-w-5xl">
-        {/* Mensajes */}
-        {error && (
-          <div className="flex items-center space-x-2 bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
-            <AlertCircle className="w-5 h-5" />
-            <span>{error}</span>
-          </div>
-        )}
+      {/* Main Content con Theme Provider */}
+      <ThemeProvider themeName={formData.theme_name} preview={showPreview}>
+        <main className="container mx-auto p-8 max-w-5xl">
+          {/* Mensajes */}
+          {error && (
+            <div className="flex items-center space-x-2 bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          )}
 
-        {success && (
-          <div className="flex items-center space-x-2 bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-xl mb-6">
-            <CheckCircle className="w-5 h-5" />
-            <span>{success}</span>
-          </div>
-        )}
+          {success && (
+            <div className="flex items-center space-x-2 bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-xl mb-6">
+              <CheckCircle className="w-5 h-5" />
+              <span>{success}</span>
+            </div>
+          )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Columna Izquierda - Información del Perfil */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 sticky top-24">
-              <h2 className="text-xl font-bold mb-6">Información del Perfil</h2>
-              
-              {/* Imagen de Perfil */}
-              <div className="flex flex-col items-center mb-6">
-                <div className="relative group">
-                  {profile?.profile_picture_url ? (
-                    <img
-                      src={profile.profile_picture_url}
-                      alt={profile.main_title}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-gray-700"
-                    />
-                  ) : (
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center border-4 border-gray-700">
-                      <User className="w-16 h-16 text-gray-400" />
-                    </div>
-                  )}
-                  <button
-                    disabled
-                    className="absolute bottom-0 right-0 bg-gradient-to-r from-pink-500 to-orange-500 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-                    title="Próximamente: Subir foto"
-                  >
-                    <Camera className="w-4 h-4 text-white" />
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-2 text-center">
-                  La subida de imágenes estará disponible próximamente
-                </p>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Columna Izquierda - Información del Perfil */}
+            <div className="lg:col-span-1">
+              <ProfileFormSection 
+                profile={profile}
+                formData={formData}
+                slugEdited={slugEdited}
+                saving={saving}
+                onInputChange={handleInputChange}
+                onThemeChange={handleThemeChange}
+                onSaveProfile={handleSaveProfile}
+              />
+            </div>
 
-              {/* Formulario de Perfil */}
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                {/* Título */}
-                <div>
-                  <label htmlFor="main_title" className="block text-sm font-medium text-gray-300 mb-2">
-                    Título Principal
-                  </label>
-                  <input
-                    id="main_title"
-                    name="main_title"
-                    type="text"
-                    required
-                    value={formData.main_title}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="Ej: Kevin Ponce"
-                  />
-                </div>
-
-                {/* Slug */}
-                <div>
-                  <label htmlFor="slug" className="block text-sm font-medium text-gray-300 mb-2">
-                    Slug (URL)
-                  </label>
-                  <input
-                    id="slug"
-                    name="slug"
-                    type="text"
-                    required
-                    value={formData.slug}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="ej: kevin-ponce"
-                  />
-                  <p className="text-xs text-gray-500 mt-1 truncate">
-                    /{formData.slug}
-                  </p>
-                </div>
-
-                {/* Descripción */}
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    required
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-700 bg-gray-700 text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-                    placeholder="Describe tu perfil..."
-                  />
-                </div>
-
-                {/* Información adicional */}
-                <div className="pt-4 border-t border-gray-700">
-                  <div className="text-xs text-gray-500 space-y-1">
-                    <p><span className="font-semibold">Tema:</span> {profile?.theme_name || 'default'}</p>
-                    <p><span className="font-semibold">Creado:</span> {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</p>
-                  </div>
-                </div>
-
-                {/* Selector de Temas */}
-                <div className="pt-4 border-t border-gray-700">
-                  <ThemeSelector
-                    selectedTheme={formData.theme_name}
-                    onThemeChange={handleThemeChange}
-                    disabled={saving}
-                  />
-                </div>
-              </form>
+            {/* Columna Derecha - Gestión de Links */}
+            <div className="lg:col-span-2">
+              <LinkList 
+                profileId={id} 
+                themeName={formData.theme_name}
+                onLinksChange={(links) => {
+                  console.log('Links actualizados:', links.length);
+                }}
+              />
             </div>
           </div>
-
-          {/* Columna Derecha - Gestión de Links */}
-          <div className="lg:col-span-2">
-            <LinkList 
-              profileId={id} 
-              themeName={formData.theme_name}
-              onLinksChange={(links) => {
-                // Callback opcional si necesitas saber cuándo cambian los links
-                console.log('Links actualizados:', links.length);
-              }}
-            />
-          </div>
-        </div>
-      </main>
+        </main>
+      </ThemeProvider>
     </div>
   );
 }
+
+// Componente separado para el formulario de perfil
+const ProfileFormSection = ({ 
+  profile, 
+  formData, 
+  slugEdited, 
+  saving, 
+  onInputChange, 
+  onThemeChange, 
+  onSaveProfile 
+}) => {
+  const themeColors = useThemeColors(formData.theme_name);
+
+  return (
+    <div 
+      className="bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border sticky top-24 shadow-xl"
+      style={{ borderColor: `${themeColors.primary}40` }}
+    >
+      <h2 className="text-xl font-bold mb-6">Información del Perfil</h2>
+      
+      {/* Imagen de Perfil */}
+      <div className="flex flex-col items-center mb-6">
+        <div className="relative group">
+          {profile?.profile_picture_url ? (
+            <img
+              src={profile.profile_picture_url}
+              alt={profile.main_title}
+              className="w-32 h-32 rounded-full object-cover border-4 shadow-xl"
+              style={{ borderColor: themeColors.primary }}
+            />
+          ) : (
+            <div 
+              className="w-32 h-32 rounded-full flex items-center justify-center border-4 shadow-xl"
+              style={{ 
+                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                borderColor: themeColors.primary
+              }}
+            >
+              <User className="w-16 h-16 text-white" />
+            </div>
+          )}
+          <button
+            disabled
+            className="absolute bottom-0 right-0 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+            title="Próximamente: Subir foto"
+          >
+            <Camera className="w-4 h-4 text-white" />
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          La subida de imágenes estará disponible próximamente
+        </p>
+      </div>
+
+      {/* Formulario de Perfil */}
+      <form onSubmit={onSaveProfile} className="space-y-4">
+        {/* Título */}
+        <div>
+          <label htmlFor="main_title" className="block text-sm font-medium text-gray-300 mb-2">
+            Título Principal
+          </label>
+          <input
+            id="main_title"
+            name="main_title"
+            type="text"
+            required
+            value={formData.main_title}
+            onChange={onInputChange}
+            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
+            style={{ 
+              borderColor: `${themeColors.primary}40`,
+              '--tw-ring-color': themeColors.primary 
+            }}
+            placeholder="Ej: Kevin Ponce"
+          />
+        </div>
+
+        {/* Slug */}
+        <div>
+          <label htmlFor="slug" className="block text-sm font-medium text-gray-300 mb-2">
+            Slug (URL)
+          </label>
+          <input
+            id="slug"
+            name="slug"
+            type="text"
+            required
+            value={formData.slug}
+            onChange={onInputChange}
+            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
+            style={{ 
+              borderColor: `${themeColors.primary}40`,
+              '--tw-ring-color': themeColors.primary 
+            }}
+            placeholder="ej: kevin-ponce"
+          />
+          <p className="text-xs text-gray-500 mt-1 truncate">
+            /{formData.slug}
+          </p>
+        </div>
+
+        {/* Descripción */}
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-2">
+            Descripción
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            required
+            value={formData.description}
+            onChange={onInputChange}
+            rows={4}
+            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 resize-none"
+            style={{ 
+              borderColor: `${themeColors.primary}40`,
+              '--tw-ring-color': themeColors.primary 
+            }}
+            placeholder="Describe tu perfil..."
+          />
+        </div>
+
+        {/* Información adicional */}
+        <div className="pt-4 border-t border-gray-700">
+          <div className="text-xs text-gray-500 space-y-1">
+            <p><span className="font-semibold">Tema:</span> {profile?.theme_name || 'default'}</p>
+            <p><span className="font-semibold">Creado:</span> {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</p>
+          </div>
+        </div>
+
+        {/* Selector de Temas */}
+        <div className="pt-4 border-t border-gray-700">
+          <ThemeSelector
+            selectedTheme={formData.theme_name}
+            onThemeChange={onThemeChange}
+            disabled={saving}
+          />
+        </div>
+      </form>
+    </div>
+  );
+};
 
 export default ProfileEdit;
