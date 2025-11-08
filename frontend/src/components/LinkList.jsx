@@ -323,7 +323,7 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   }
 
   return (
-    <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+    <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 border border-gray-700">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -4,6 +4,7 @@ import ProfileRequest from '../api/ProfileRequest';
 import LinkRequest from '../api/LinkRequest';
 import DynamicIcon from '../components/DynamicIcon';
 import ThemeProvider, { useThemeColors } from '../components/ThemeProvider';
+import Watermark from '../components/Watermark';
 import { Loader2, User, ExternalLink, AlertCircle } from 'lucide-react';
 
 function PublicProfile() {
@@ -103,7 +104,7 @@ function PublicProfile() {
         <div className="max-w-2xl mx-auto">
           {/* Profile Header */}
           <div 
-            className="bg-gray-800/90 backdrop-blur-sm rounded-2xl p-8 mb-6 border text-center shadow-2xl"
+            className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-8 mb-6 border text-center shadow-2xl"
             style={{ borderColor: `${themeColors.primary}40` }}
           >
             {/* Profile Picture */}
@@ -137,26 +138,12 @@ function PublicProfile() {
                 {profile.description}
               </p>
             )}
-
-            {/* Theme Badge (opcional) */}
-            {profile.theme_name && profile.theme_name !== 'default' && (
-              <div 
-                className="inline-flex items-center px-4 py-2 rounded-full text-sm text-white shadow-lg"
-                style={{ backgroundColor: `${themeColors.primary}40` }}
-              >
-                <span 
-                  className="w-2 h-2 rounded-full mr-2"
-                  style={{ backgroundColor: themeColors.primary }}
-                ></span>
-                Tema: {profile.theme_name}
-              </div>
-            )}
           </div>
 
           {/* Links Section */}
           <div className="space-y-4">
             {links.length === 0 ? (
-              <div className="bg-gray-800/90 backdrop-blur-sm rounded-2xl p-12 text-center border border-gray-700">
+              <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-12 text-center border border-gray-700">
                 <ExternalLink className="w-16 h-16 mx-auto text-gray-600 mb-4" />
                 <p className="text-gray-400 text-lg">
                   No hay links disponibles aún
@@ -167,7 +154,7 @@ function PublicProfile() {
                 <button
                   key={link.id}
                   onClick={() => handleLinkClick(link.url)}
-                  className="w-full bg-gray-800/90 backdrop-blur-sm hover:bg-gray-700/90 border rounded-2xl p-5 transition-all duration-300 group transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                  className="w-full bg-gray-800/80 backdrop-blur-md hover:bg-gray-700/80 border rounded-2xl p-5 transition-all duration-300 group transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
                   style={{ 
                     borderColor: 'transparent',
                     '--hover-border': themeColors.primary 
@@ -222,6 +209,9 @@ function PublicProfile() {
 
           {/* Footer */}
           <div className="mt-12 text-center">
+            {/* Marca de agua - Solo para usuarios no premium */}
+            <Watermark profile={profile} themeName={profile.theme_name} />
+            
             <p className="text-gray-400 text-sm">
               Creado con{' '}
               <a

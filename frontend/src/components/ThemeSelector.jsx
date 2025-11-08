@@ -53,7 +53,7 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                   onClick={() => handleThemeSelect(theme.id)}
                   disabled={!theme.available || disabled}
                   className={`
-                    relative overflow-hidden rounded-xl border-2 transition-all text-left
+                    relative overflow-hidden rounded-xl border-2 transition-all text-left bg-gray-700/60 backdrop-blur-sm
                     ${selectedTheme === theme.id 
                       ? 'border-orange-500 shadow-lg shadow-orange-500/20' 
                       : 'border-gray-700 hover:border-gray-600'

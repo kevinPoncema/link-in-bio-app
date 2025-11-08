@@ -5,7 +5,7 @@ import ThemesRequest from '../api/ThemesRequest';
  * Componente que aplica estilos de tema a sus hijos
  * Soporta colores personalizados y imagen de fondo
  */
-const ThemeProvider = ({ themeName = 'default', children, preview = false }) => {
+const ThemeProvider = ({ themeName = 'default', children }) => {
   const theme = ThemesRequest.getThemeById(themeName) || ThemesRequest.getThemeById('default');
 
   // Estilos para el contenedor principal
@@ -30,7 +30,7 @@ const ThemeProvider = ({ themeName = 'default', children, preview = false }) => 
     backgroundAttachment: 'fixed',
   } : null;
 
-  // Overlay oscuro sobre la imagen para mejorar legibilidad
+  // Overlay oscuro sobre la imagen para mejorar legibilidad (reducido)
   const overlayStyle = theme.preview ? {
     position: 'absolute',
     top: 0,
@@ -38,7 +38,7 @@ const ThemeProvider = ({ themeName = 'default', children, preview = false }) => 
     width: '100%',
     height: '100%',
     zIndex: 1,
-    background: `linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.8))`,
+    background: `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.5))`,
   } : null;
 
   // Estilos para el fondo con gradiente (cuando no hay imagen)
@@ -81,24 +81,6 @@ const ThemeProvider = ({ themeName = 'default', children, preview = false }) => 
       <div style={contentStyle}>
         {children}
       </div>
-
-      {/* Indicador de preview */}
-      {preview && (
-        <div style={{
-          position: 'fixed',
-          top: '1rem',
-          right: '1rem',
-          zIndex: 1000,
-          background: 'rgba(0, 0, 0, 0.8)',
-          padding: '0.5rem 1rem',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          color: 'white',
-          border: `2px solid ${theme.colors.primary}`,
-        }}>
-          <span style={{ color: theme.colors.primary, fontWeight: 'bold' }}>●</span> Vista Previa: {theme.name}
-        </div>
-      )}
     </div>
   );
 };

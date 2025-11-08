@@ -12,8 +12,7 @@ import {
   User, 
   Camera, 
   CheckCircle,
-  AlertCircle,
-  Eye
+  AlertCircle
 } from 'lucide-react';
 
 function ProfileEdit() {
@@ -24,7 +23,6 @@ function ProfileEdit() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
   
   // Estado para los datos del formulario de perfil
   const [formData, setFormData] = useState({
@@ -188,44 +186,29 @@ function ProfileEdit() {
               Editar Perfil
             </h1>
           </div>
-          <div className="flex items-center space-x-3">
-            {/* Botón Vista Previa */}
-            <button
-              onClick={() => setShowPreview(!showPreview)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold transition-all ${
-                showPreview 
-                  ? 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700' 
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              <Eye className="w-5 h-5" />
-              <span>{showPreview ? 'Ocultar' : 'Vista'} Previa</span>
-            </button>
-            
-            {/* Botón Guardar */}
-            <button
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Guardando...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5" />
-                  <span>Guardar</span>
-                </>
-              )}
-            </button>
-          </div>
+          {/* Botón Guardar */}
+          <button
+            onClick={handleSaveProfile}
+            disabled={saving}
+            className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Guardando...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-5 h-5" />
+                <span>Guardar Cambios</span>
+              </>
+            )}
+          </button>
         </div>
       </nav>
 
       {/* Main Content con Theme Provider */}
-      <ThemeProvider themeName={formData.theme_name} preview={showPreview}>
+      <ThemeProvider themeName={formData.theme_name}>
         <main className="container mx-auto p-8 max-w-5xl">
           {/* Mensajes */}
           {error && (
@@ -287,7 +270,7 @@ const ProfileFormSection = ({
 
   return (
     <div 
-      className="bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 border sticky top-24 shadow-xl"
+      className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 border sticky top-24 shadow-xl"
       style={{ borderColor: `${themeColors.primary}40` }}
     >
       <h2 className="text-xl font-bold mb-6">Información del Perfil</h2>
@@ -341,7 +324,7 @@ const ProfileFormSection = ({
             required
             value={formData.main_title}
             onChange={onInputChange}
-            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
+            className="w-full px-4 py-2 border bg-gray-700/80 backdrop-blur-md text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
             style={{ 
               borderColor: `${themeColors.primary}40`,
               '--tw-ring-color': themeColors.primary 
@@ -362,7 +345,7 @@ const ProfileFormSection = ({
             required
             value={formData.slug}
             onChange={onInputChange}
-            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
+            className="w-full px-4 py-2 border bg-gray-700/80 backdrop-blur-md text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2"
             style={{ 
               borderColor: `${themeColors.primary}40`,
               '--tw-ring-color': themeColors.primary 
@@ -386,7 +369,7 @@ const ProfileFormSection = ({
             value={formData.description}
             onChange={onInputChange}
             rows={4}
-            className="w-full px-4 py-2 border bg-gray-700/90 backdrop-blur-sm text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 resize-none"
+            className="w-full px-4 py-2 border bg-gray-700/80 backdrop-blur-md text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 resize-none"
             style={{ 
               borderColor: `${themeColors.primary}40`,
               '--tw-ring-color': themeColors.primary 
