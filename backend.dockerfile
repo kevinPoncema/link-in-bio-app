@@ -22,6 +22,9 @@ RUN apt-get update && apt-get install -y \
     npm \
     nodejs \
     netcat-traditional \
+    imagemagick \
+    libmagickwand-dev \
+    webp \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo \
@@ -34,6 +37,8 @@ RUN apt-get update && apt-get install -y \
         bcmath \
         gd \
         zip \
+    && pecl install imagick \
+    && docker-php-ext-enable imagick \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -79,14 +84,21 @@ if [ "$DB_CONNECTION" = "mysql" ]; then\n\
     php artisan migrate --force\n\
 fi\n\
 \n\
-# Luego limpiar cache (después de que existan las tablas)\n\
-echo "🧹 Clearing application cache..."\n\
-php artisan config:clear\n\
-php artisan cache:clear || true\n\
+# Configurar directorios de almacenamiento\n\
+echo "📁 Setting up storage directories..."\n\
+mkdir -p /var/www/html/storage/app/public/profile-pictures\n\
+mkdir -p /var/www/html/storage/app/public/images\n\
+mkdir -p /var/www/html/storage/app/public/uploads\n\
+chmod -R 777 /var/www/html/storage/app/public\n\
 \n\
 # Crear enlace simbólico para storage\n\
 echo "🔗 Creating storage link..."\n\
 php artisan storage:link || true\n\
+\n\
+# Luego limpiar cache (después de que existan las tablas)\n\
+echo "🧹 Clearing application cache..."\n\
+php artisan config:clear\n\
+php artisan cache:clear || true\n\
 \n\
 # Optimizar para producción si está configurado\n\
 if [ "$APP_ENV" = "production" ]; then\n\
