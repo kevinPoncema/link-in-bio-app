@@ -59,9 +59,6 @@ server {
 }
 EOF
 
-# Exponer puerto 80
-EXPOSE 80
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost/ || exit 1
@@ -83,9 +80,6 @@ RUN npm install
 
 # Copiar todo el código fuente del frontend
 COPY ./frontend .
-
-# Exponer puerto para desarrollo (Vite)
-EXPOSE 5173
 
 # Configurar Vite para aceptar conexiones externas
 ENV HOST=0.0.0.0

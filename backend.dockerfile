@@ -115,8 +115,5 @@ echo "🌐 Starting server on 0.0.0.0:8000"\n\
 exec php artisan serve --host=0.0.0.0 --port=8000' > /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Exponer puerto 8000
-EXPOSE 8000
-
 # Usar el script de entrada personalizado
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
