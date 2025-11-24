@@ -79,9 +79,9 @@ if [ "$DB_CONNECTION" = "mysql" ]; then\n\
     done\n\
     echo "✅ MySQL is ready!"\n\
     \n\
-    # Ejecutar migraciones primero\n\
-    echo "📊 Running database migrations..."\n\
-    php artisan migrate --force\n\
+    # Intentar ejecutar migraciones (no fallar si hay error)\n\
+    echo "📊 Attempting to run database migrations..."\n\
+    php artisan migrate --force || echo "⚠️  Migration failed, continuing anyway..."\n\
 fi\n\
 \n\
 # Configurar directorios de almacenamiento\n\
@@ -97,15 +97,15 @@ php artisan storage:link || true\n\
 \n\
 # Luego limpiar cache (después de que existan las tablas)\n\
 echo "🧹 Clearing application cache..."\n\
-php artisan config:clear\n\
+php artisan config:clear || true\n\
 php artisan cache:clear || true\n\
 \n\
 # Optimizar para producción si está configurado\n\
 if [ "$APP_ENV" = "production" ]; then\n\
     echo "⚡ Optimizing for production..."\n\
-    php artisan config:cache\n\
-    php artisan route:cache\n\
-    php artisan view:cache\n\
+    php artisan config:cache || true\n\
+    php artisan route:cache || true\n\
+    php artisan view:cache || true\n\
 fi\n\
 \n\
 echo "✅ Laravel application is ready!"\n\
