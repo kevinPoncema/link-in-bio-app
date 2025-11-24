@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, CheckCircle, XCircle, Facebook, Twitter, Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, CheckCircle, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import AuthRequest from '../api/AuthRequest';
 import { useNavigate } from 'react-router-dom';
 
@@ -171,14 +171,8 @@ function App() {
           </button>
         </div>
             
-        {/* Botones de inicio de sesión social (Facebook, Twitter, Google) */}
-        {/* Estos botones simulan el acceso rápido utilizando credenciales de terceros. 
-            Al hacer clic, usan la función setError para mostrar un mensaje informativo no bloqueante. */}
-        <div className="flex justify-center space-x-4 pt-4">
-          <SocialButton icon={Facebook} color="Facebook" setError={setError} />
-          <SocialButton icon={Twitter} color="Twitter" setError={setError} />
-          <SocialButton icon={Chrome} color="Google" setError={setError} />
-        </div>
+        {/* Sección de login social removida por simplicidad */}
+        {/* Los botones de redes sociales han sido eliminados para mantener el foco en la autenticación básica */}
         
         <div className="border-t border-gray-700 pt-4"></div>
 
