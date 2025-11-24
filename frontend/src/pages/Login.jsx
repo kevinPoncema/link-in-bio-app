@@ -8,19 +8,6 @@ const gradientPrimary = 'bg-gradient-to-r from-pink-500 to-orange-500 hover:from
 const gradientActive = 'bg-gradient-to-r from-red-500 to-yellow-500 text-white shadow-lg shadow-yellow-500/30';
 const gradientInactive = 'bg-gray-700 text-gray-400 hover:bg-gray-600';
 
-// Componente externo para manejar la lógica de botones sociales y acceso al estado de error
-// MOVIDO FUERA de App para evitar re-renders innecesarios.
-const SocialButton = ({ icon: Icon, color, setError }) => (
-  <button
-    className={`p-3 rounded-full shadow-lg ${gradientPrimary} transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 ring-offset-2 ring-offset-gray-800 focus:ring-orange-500`}
-    aria-label={`Login con ${color}`}
-    // Muestra un mensaje de error no bloqueante en lugar de usar alert()
-    onClick={() => setError(`El login con ${color} no está implementado en esta demostración.`)}
-  >
-    <Icon className="w-5 h-5 text-white" />
-  </button>
-);
-
 // Componente de campo de entrada que incluye el botón de mostrar/ocultar contraseña
 // MOVIDO FUERA de App para evitar re-renders innecesarios y la pérdida de foco.
 const InputField = ({ id, name, type, value, placeholder, required, icon: Icon, label, autoComplete = 'off', handleInputChange, showPassword, setShowPassword }) => {
