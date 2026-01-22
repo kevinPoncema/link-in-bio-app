@@ -135,27 +135,6 @@ class ThemeService
     }
 
     /**
-     * Generar un slug único a partir del nombre
-     *
-     * @param string $name
-     * @param int|null $excludeId
-     * @return string
-     */
-    protected function generateUniqueSlug(string $name, ?int $excludeId = null): string
-    {
-        $slug = Str::slug($name);
-        $originalSlug = $slug;
-        $counter = 1;
-
-        while ($this->themeRepository->slugExists($slug, $excludeId)) {
-            $slug = $originalSlug . '-' . $counter;
-            $counter++;
-        }
-
-        return $slug;
-    }
-
-    /**
      * Obtener todos los temas
      *
      * @return \Illuminate\Database\Eloquent\Collection
@@ -208,7 +187,6 @@ class ThemeService
     {
         $validator = Validator::make($data, [
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:themes,slug',
             'preview_url' => 'nullable',
             'primary_color' => 'required|string|max:50',
             'secondary_color' => 'required|string|max:50',
@@ -219,10 +197,6 @@ class ThemeService
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
-        }
-
-        if (empty($data['slug'])) {
-            $data['slug'] = $this->generateUniqueSlug($data['name']);
         }
 
         if (isset($data['preview_url'])) {
@@ -250,7 +224,6 @@ class ThemeService
 
         $validator = Validator::make($data, [
             'name' => 'sometimes|required|string|max:255',
-            'slug' => 'sometimes|required|string|max:255|unique:themes,slug,' . $id,
             'preview_url' => 'nullable',
             'primary_color' => 'sometimes|required|string|max:50',
             'secondary_color' => 'sometimes|required|string|max:50',
@@ -259,10 +232,6 @@ class ThemeService
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
-        }
-
-        if (isset($data['name']) && !isset($data['slug'])) {
-            $data['slug'] = $this->generateUniqueSlug($data['name'], $id);
         }
 
         if (isset($data['preview_url'])) {
