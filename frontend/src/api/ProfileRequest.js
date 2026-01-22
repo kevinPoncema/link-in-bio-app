@@ -123,7 +123,7 @@ class ProfileRequest {
    * @param {string} profileData.main_title - Título principal del perfil
    * @param {string} profileData.slug - Slug único del perfil
    * @param {string} profileData.description - Descripción del perfil
-   * @param {string} profileData.theme_name - Nombre del tema del perfil
+   * @param {number} profileData.theme_id - ID del tema del perfil
    * @param {string} profileData.profile_picture - URL o base64 de la imagen de perfil
    * @returns {Promise<Object>} Perfil actualizado
    */
@@ -136,7 +136,7 @@ class ProfileRequest {
           main_title: profileData.main_title,
           slug: profileData.slug,
           description: profileData.description,
-          theme_name: profileData.theme_name || 'default',
+          theme_id: profileData.theme_id || 1,
           profile_picture: profileData.profile_picture || null,
         }),
       });

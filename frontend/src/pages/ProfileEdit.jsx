@@ -32,7 +32,7 @@ function ProfileEdit() {
     main_title: '',
     slug: '',
     description: '',
-    theme_name: 'default',
+    theme_id: 1,
     profile_picture: '',
   });
   const [slugEdited, setSlugEdited] = useState(false);
@@ -64,7 +64,7 @@ function ProfileEdit() {
         main_title: profileData.main_title || '',
         slug: profileData.slug || '',
         description: profileData.description || '',
-        theme_name: profileData.theme_name || 'default',
+        theme_id: profileData.theme_id || 1,
         profile_picture: profileData.profile_picture_url || '',
       });
       // Usar el helper para obtener la URL completa
@@ -118,7 +118,7 @@ function ProfileEdit() {
   const handleThemeChange = (themeName) => {
     setFormData(prev => ({
       ...prev,
-      theme_name: themeName,
+      theme_id: themeName,
     }));
   };
 
@@ -177,7 +177,7 @@ function ProfileEdit() {
         main_title: formData.main_title,
         slug: formData.slug,
         description: formData.description,
-        theme_name: formData.theme_name,
+        theme_id: formData.theme_id,
       };
       
       // Solo incluir profile_picture si fue modificada
@@ -275,7 +275,7 @@ function ProfileEdit() {
       </nav>
 
       {/* Main Content con Theme Provider */}
-      <ThemeProvider themeName={formData.theme_name}>
+      <ThemeProvider themeId={formData.theme_id}>
         <main className="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
           {/* Mensajes */}
           {error && (
@@ -315,7 +315,7 @@ function ProfileEdit() {
             <div className="lg:col-span-2">
               <LinkList 
                 profileId={id} 
-                themeName={formData.theme_name}
+                themeId={formData.theme_id}
                 onLinksChange={(links) => {
                   console.log('Links actualizados:', links.length);
                 }}
@@ -343,7 +343,7 @@ const ProfileFormSection = ({
   onRemoveImage,
   onImageClick
 }) => {
-  const themeColors = useThemeColors(formData.theme_name);
+  const themeColors = useThemeColors(formData.theme_id);
 
   return (
     <div 
@@ -493,7 +493,7 @@ const ProfileFormSection = ({
         {/* Información adicional */}
         <div className="pt-4 border-t border-gray-700">
           <div className="text-xs text-gray-500 space-y-1">
-            <p><span className="font-semibold">Tema:</span> {profile?.theme_name || 'default'}</p>
+            <p><span className="font-semibold">Tema:</span> ID {profile?.theme_id || 1}</p>
             <p><span className="font-semibold">Creado:</span> {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</p>
           </div>
         </div>
@@ -501,7 +501,7 @@ const ProfileFormSection = ({
         {/* Selector de Temas */}
         <div className="pt-4 border-t border-gray-700">
           <ThemeSelector
-            selectedTheme={formData.theme_name}
+            selectedTheme={formData.theme_id}
             onThemeChange={onThemeChange}
             disabled={saving}
           />

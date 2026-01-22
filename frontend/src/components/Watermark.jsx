@@ -5,8 +5,8 @@ import { useThemeColors } from './ThemeProvider';
  * Componente de marca de agua
  * Se muestra solo para usuarios no premium
  */
-const Watermark = ({ profile, themeName = 'default' }) => {
-  const themeColors = useThemeColors(themeName);
+const Watermark = ({ profile, themeId = 1 }) => {
+  const themeColors = useThemeColors(themeId);
 
   // Verificar si el usuario es premium
   const isPremium = profile?.IsFromPremiumUser === true;

@@ -98,7 +98,7 @@ function PublicProfile() {
 
   // Componente interno con acceso a los colores del tema
   const ProfileContent = () => {
-    const themeColors = useThemeColors(profile.theme_name);
+    const themeColors = useThemeColors(profile.theme_id);
 
     return (
       <div className="py-8 px-4 sm:px-6 lg:px-8">
@@ -211,7 +211,7 @@ function PublicProfile() {
           {/* Footer */}
           <div className="mt-12 text-center">
             {/* Marca de agua - Solo para usuarios no premium */}
-            <Watermark profile={profile} themeName={profile.theme_name} />
+            <Watermark profile={profile} themeId={profile.theme_id} />
             
             <p className="text-gray-400 text-sm">
               Creado con{' '}
@@ -232,7 +232,7 @@ function PublicProfile() {
   };
 
   return (
-    <ThemeProvider themeName={profile.theme_name}>
+    <ThemeProvider themeId={profile.theme_id}>
       <ProfileContent />
     </ThemeProvider>
   );

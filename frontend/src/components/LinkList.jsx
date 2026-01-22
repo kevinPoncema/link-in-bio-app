@@ -123,7 +123,7 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
   );
 };
 
-const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
+const LinkList = ({ profileId, themeId = 1, onLinksChange }) => {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -331,11 +331,6 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
           <p className="text-xs sm:text-sm text-gray-400 mt-1">
             Gestiona y ordena tus enlaces
           </p>
-          {themeName && themeName !== 'default' && (
-            <p className="text-xs text-orange-400 mt-1">
-              Tema actual: {themeName}
-            </p>
-          )}
         </div>
         <div className="flex items-center flex-wrap gap-2 sm:gap-3">
           {hasUnsavedChanges && (
