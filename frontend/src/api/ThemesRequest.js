@@ -1,127 +1,120 @@
-// Lista de temas disponibles para los perfiles
-const themes = [
-  {
-    id: 'default',
-    name: 'Default',
-    available: true,
-    preview: null, // Sin imagen de fondo
-    colors: {
-      primary: '#f97316', // orange-500
-      secondary: '#ec4899', // pink-500
-      background: '#1f2937', // gray-800
-    }
-  },
-  {
-    id: 'gradient-sunset',
-    name: 'Gradient Sunset',
-    available: true,
-    preview: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
-    colors: {
-      primary: '#f59e0b',
-      secondary: '#ef4444',
-      background: '#1e293b',
-    }
-  },
-  {
-    id: 'ocean-blue',
-    name: 'Ocean Blue',
-    available: true,
-    preview: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=300&fit=crop',
-    colors: {
-      primary: '#3b82f6',
-      secondary: '#06b6d4',
-      background: '#0f172a',
-    }
-  },
-  {
-    id: 'forest-green',
-    name: 'Forest Green',
-    available: true,
-    preview: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-    colors: {
-      primary: '#10b981',
-      secondary: '#059669',
-      background: '#064e3b',
-    }
-  },
-  {
-    id: 'purple-night',
-    name: 'Purple Night',
-    available: true,
-    preview: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=400&h=300&fit=crop',
-    colors: {
-      primary: '#a855f7',
-      secondary: '#8b5cf6',
-      background: '#581c87',
-    }
-  },
-  {
-    id: 'sunset-pink',
-    name: 'Sunset Pink',
-    available: true,
-    preview: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=300&fit=crop',
-    colors: {
-      primary: '#ec4899',
-      secondary: '#f472b6',
-      background: '#831843',
-    }
-  },
-];
+// Obtener la URL base desde las variables de entorno
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class ThemesRequest {
   /**
-   * Obtener todos los temas disponibles
-   * @returns {Array} Lista de temas
+   * Método helper para hacer peticiones con manejo de errores
    */
-  static getAllThemes() {
-    return themes;
+  static async request(url, options = {}) {
+    try {
+      const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+        ...options.headers,
+      };
+
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error en petición:', error);
+      throw error;
+    }
   }
 
   /**
-   * Obtener solo los temas disponibles
-   * @returns {Array} Lista de temas disponibles
+   * Obtener todos los temas (sistema + personalizados del usuario)
+   * @returns {Promise<Array>} Lista de temas
    */
-  static getAvailableThemes() {
-    return themes.filter(theme => theme.available);
+  static async getAllThemes() {
+    const data = await this.request(`${BASE_URL}/api/themes`, {
+      method: 'GET',
+    });
+    return data.data || data;
   }
 
   /**
    * Obtener un tema por su ID
-   * @param {string} themeId - ID del tema
-   * @returns {Object|null} Tema encontrado o null
+   * @param {number} themeId - ID del tema
+   * @returns {Promise<Object>} Tema encontrado
    */
-  static getThemeById(themeId) {
-    return themes.find(t => t.id === themeId) || null;
+  static async getThemeById(themeId) {
+    const data = await this.request(`${BASE_URL}/api/themes/${themeId}`, {
+      method: 'GET',
+    });
+    return data.data || data;
   }
 
   /**
-   * Verificar si un tema está disponible
-   * @param {string} themeId - ID del tema
-   * @returns {boolean} True si está disponible
+   * Crear un nuevo tema personalizado
+   * @param {Object} themeData - Datos del tema
+   * @returns {Promise<Object>} Tema creado
    */
-  static isThemeAvailable(themeId) {
-    const theme = themes.find(t => t.id === themeId);
-    return theme ? theme.available : false;
+  static async createTheme(themeData) {
+    const data = await this.request(`${BASE_URL}/api/themes`, {
+      method: 'POST',
+      body: JSON.stringify(themeData),
+    });
+    return data.data || data;
+  }
+
+  /**
+   * Actualizar un tema existente
+   * @param {number} themeId - ID del tema
+   * @param {Object} themeData - Datos a actualizar
+   * @returns {Promise<Object>} Tema actualizado
+   */
+  static async updateTheme(themeId, themeData) {
+    const data = await this.request(`${BASE_URL}/api/themes/${themeId}`, {
+      method: 'PUT',
+      body: JSON.stringify(themeData),
+    });
+    return data.data || data;
+  }
+
+  /**
+   * Eliminar un tema personalizado
+   * @param {number} themeId - ID del tema
+   * @returns {Promise<Object>} Respuesta de la eliminación
+   */
+  static async deleteTheme(themeId) {
+    return await this.request(`${BASE_URL}/api/themes/${themeId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /**
+   * Validar un color hexadecimal
+   * @param {string} color - Color en formato hex
+   * @returns {boolean} True si es válido
+   */
+  static isValidHexColor(color) {
+    return /^#[0-9A-F]{6}$/i.test(color);
   }
 
   /**
    * Obtener los colores de un tema
-   * @param {string} themeId - ID del tema
-   * @returns {Object|null} Objeto con colores o null
+   * @param {Object} theme - Objeto tema
+   * @returns {Object} Objeto con colores
    */
-  static getThemeColors(themeId) {
-    const theme = themes.find(t => t.id === themeId);
-    return theme ? theme.colors : null;
-  }
-
-  /**
-   * Obtener el nombre de un tema
-   * @param {string} themeId - ID del tema
-   * @returns {string} Nombre del tema o 'Default'
-   */
-  static getThemeName(themeId) {
-    const theme = themes.find(t => t.id === themeId);
-    return theme ? theme.name : 'Default';
+  static getThemeColors(theme) {
+    return {
+      primary: theme.primary_color,
+      secondary: theme.secondary_color,
+      background: theme.background_color,
+    };
   }
 }
 

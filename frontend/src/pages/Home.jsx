@@ -4,7 +4,8 @@ import AuthRequest from '../api/AuthRequest';
 import ProfileRequest from '../api/ProfileRequest';
 import ProfileCard from '../components/ProfileCard';
 import ProfileForm from '../components/ProfileForm';
-import { LogOut, User, Plus, Loader2, CheckCircle } from 'lucide-react';
+import ThemeManager from '../components/ThemeManager';
+import { LogOut, User, Plus, Loader2, CheckCircle, Palette, FolderOpen } from 'lucide-react';
 
 function Home() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ function Home() {
   const [showModal, setShowModal] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState('');
+  const [activeTab, setActiveTab] = useState('profiles'); // 'profiles' o 'themes'
 
   useEffect(() => {
     // Verificar si hay sesión activa
@@ -134,28 +136,58 @@ function Home() {
       </nav>
 
       <main className="container mx-auto p-4 sm:p-6 md:p-8">
-        {/* Sección de Perfiles */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-            <div>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2">Mis Perfiles</h2>
-              <p className="text-sm sm:text-base text-gray-400">
-                Gestiona tus perfiles de Link in Bio
-              </p>
-            </div>
-            <button
-              onClick={handleCreateProfile}
-              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Crear Perfil</span>
-            </button>
-          </div>
+        {/* Tabs de navegación */}
+        <div className="flex gap-2 mb-6 border-b border-gray-700">
+          <button
+            onClick={() => setActiveTab('profiles')}
+            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all border-b-2 ${
+              activeTab === 'profiles'
+                ? 'border-orange-500 text-orange-500'
+                : 'border-transparent text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            <FolderOpen className="w-5 h-5" />
+            <span className="hidden sm:inline">Mis Perfiles</span>
+            <span className="sm:hidden">Perfiles</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('themes')}
+            className={`flex items-center gap-2 px-4 py-3 font-medium transition-all border-b-2 ${
+              activeTab === 'themes'
+                ? 'border-orange-500 text-orange-500'
+                : 'border-transparent text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            <Palette className="w-5 h-5" />
+            <span className="hidden sm:inline">Mis Temas</span>
+            <span className="sm:hidden">Temas</span>
+          </button>
+        </div>
 
-          {/* Mensajes de error */}
-          {error && (
-            <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
-              {error}
+        {/* Contenido según tab activo */}
+        {activeTab === 'profiles' ? (
+          /* Sección de Perfiles */
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+              <div>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2">Mis Perfiles</h2>
+                <p className="text-sm sm:text-base text-gray-400">
+                  Gestiona tus perfiles de Link in Bio
+                </p>
+              </div>
+              <button
+                onClick={handleCreateProfile}
+                className="flex items-center justify-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto"
+              >
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Crear Perfil</span>
+              </button>
+            </div>
+
+            {/* Mensajes de error */}
+            {error && (
+              <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
+                {error}
             </div>
           )}
 
@@ -206,6 +238,10 @@ function Home() {
             </div>
           )}
         </div>
+        ) : (
+          /* Sección de Temas */
+          <ThemeManager />
+        )}
       </main>
 
       {/* Modal de Creación de Perfil */}

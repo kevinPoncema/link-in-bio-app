@@ -1,22 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Lock } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import ThemesRequest from '../api/ThemesRequest';
 
 const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
   const [themes, setThemes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Cargar temas al montar el componente
   useEffect(() => {
-    const themesData = ThemesRequest.getAllThemes();
-    setThemes(themesData);
+    loadThemes();
   }, []);
 
+  const loadThemes = async () => {
+    try {
+      setLoading(true);
+      const data = await ThemesRequest.getAllThemes();
+      setThemes(data);
+    } catch (error) {
+      console.error('Error al cargar temas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleThemeSelect = (themeId) => {
-    const theme = themes.find(t => t.id === themeId);
-    if (theme && theme.available && !disabled) {
+    if (!disabled) {
       onThemeChange(themeId);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+        <span className="ml-2 text-gray-400 text-sm">Cargando temas...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -51,23 +71,22 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                   key={theme.id}
                   type="button"
                   onClick={() => handleThemeSelect(theme.id)}
-                  disabled={!theme.available || disabled}
+                  disabled={disabled}
                   className={`
                     relative overflow-hidden rounded-xl border-2 transition-all text-left bg-gray-700/60 backdrop-blur-sm
-                    ${selectedTheme === theme.id 
+                    ${selectedTheme == theme.id 
                       ? 'border-orange-500 shadow-lg shadow-orange-500/20' 
                       : 'border-gray-700 hover:border-gray-600'
                     }
-                    ${!theme.available ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-                    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                   `}
                 >
                   <div className="flex items-center p-3 h-[72px]">
                     {/* Preview Section */}
                     <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden mr-3">
-                      {theme.preview ? (
+                      {theme.preview_url ? (
                         <img
-                          src={theme.preview}
+                          src={theme.preview_url}
                           alt={theme.name}
                           className="w-full h-full object-cover"
                         />
@@ -75,7 +94,7 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                         <div 
                           className="w-full h-full flex items-center justify-center"
                           style={{ 
-                            background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})` 
+                            background: `linear-gradient(135deg, ${theme.primary_color}, ${theme.secondary_color})` 
                           }}
                         >
                           <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
@@ -86,51 +105,45 @@ const ThemeSelector = ({ selectedTheme, onThemeChange, disabled = false }) => {
                     </div>
 
                     {/* Theme Info */}
-                    <div className="flex-1 min-w-0 flex items-center">
+                    <div className="flex-1 min-w-0 flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <h4 className="text-sm font-medium text-white">
                           {theme.name}
                         </h4>
-                        {!theme.available && (
-                          <Lock className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                        {theme.is_custom && (
+                          <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">
+                            Custom
+                          </span>
                         )}
                       </div>
-                    </div>
 
-                    {/* Selected Indicator */}
-                    {selectedTheme === theme.id && theme.available && (
-                      <div className="flex-shrink-0 ml-3">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
+                      {/* Selected Indicator */}
+                      {selectedTheme == theme.id && (
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center ml-2">
                           <Check className="w-4 h-4 text-white" />
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
+                  </div>
 
-                    {/* Coming Soon Badge */}
-                    {!theme.available && (
-                      <div className="flex-shrink-0 ml-3">
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-700 text-gray-400 font-medium whitespace-nowrap">
-                          Próximamente
-                        </span>
-                      </div>
-                    )}
+                  {/* Color Indicators */}
+                  <div className="flex gap-1 px-3 pb-2">
+                    <div
+                      className="flex-1 h-1 rounded-full"
+                      style={{ backgroundColor: theme.primary_color }}
+                    />
+                    <div
+                      className="flex-1 h-1 rounded-full"
+                      style={{ backgroundColor: theme.secondary_color }}
+                    />
+                    <div
+                      className="flex-1 h-1 rounded-full"
+                      style={{ backgroundColor: theme.background_color }}
+                    />
                   </div>
                 </button>
               ))}
             </div>
-            
-            {/* Indicador de scroll (gradient fade) */}
-            {themes.length > 3 && (
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-800 to-transparent pointer-events-none"></div>
-            )}
-          </div>
-
-          {/* Info Box */}
-          <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3">
-            <p className="text-xs text-blue-300">
-              💡 <span className="font-semibold">Disponibles:</span> Todos los temas están ahora disponibles.
-              Personaliza tu perfil con el estilo que más te guste.
-            </p>
           </div>
         </>
       )}
