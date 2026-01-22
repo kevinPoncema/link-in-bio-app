@@ -37,6 +37,7 @@ function ProfileEdit() {
   });
   const [slugEdited, setSlugEdited] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageChanged, setImageChanged] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -68,6 +69,7 @@ function ProfileEdit() {
       });
       // Usar el helper para obtener la URL completa
       setImagePreview(getFullImageUrl(profileData.profile_picture_url));
+      setImageChanged(false); // Reset al cargar
       setSlugEdited(true);
       
     } catch (err) {
@@ -136,6 +138,7 @@ function ProfileEdit() {
       // Convertir a base64
       const base64String = await fileToBase64(file);
       setImagePreview(base64String);
+      setImageChanged(true); // Marcar que la imagen fue modificada
       setFormData(prev => ({
         ...prev,
         profile_picture: base64String,
@@ -148,6 +151,7 @@ function ProfileEdit() {
 
   const handleRemoveImage = () => {
     setImagePreview(null);
+    setImageChanged(true); // Marcar que la imagen fue modificada (removida)
     setFormData(prev => ({
       ...prev,
       profile_picture: '',
@@ -168,7 +172,20 @@ function ProfileEdit() {
       setError('');
       setSuccess('');
       
-      await ProfileRequest.updateProfile(id, formData);
+      // Preparar los datos para enviar
+      const dataToSend = {
+        main_title: formData.main_title,
+        slug: formData.slug,
+        description: formData.description,
+        theme_name: formData.theme_name,
+      };
+      
+      // Solo incluir profile_picture si fue modificada
+      if (imageChanged) {
+        dataToSend.profile_picture = formData.profile_picture;
+      }
+      
+      await ProfileRequest.updateProfile(id, dataToSend);
       
       setSuccess('¡Perfil actualizado exitosamente!');
       // Recargar datos del perfil
