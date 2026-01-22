@@ -493,7 +493,7 @@ const ProfileFormSection = ({
         {/* Información adicional */}
         <div className="pt-4 border-t border-gray-700">
           <div className="text-xs text-gray-500 space-y-1">
-            <p><span className="font-semibold">Tema:</span> ID {profile?.theme_id || 1}</p>
+            <p><span className="font-semibold">Tema:</span> {profile?.theme?.name || `ID ${profile?.theme_id || 1}`}</p>
             <p><span className="font-semibold">Creado:</span> {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : '-'}</p>
           </div>
         </div>

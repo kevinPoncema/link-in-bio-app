@@ -146,7 +146,7 @@ const ProfileCard = ({ profile, onDelete }) => {
               </span>
               <span className="flex items-center justify-center space-x-1">
                 <span className="font-semibold text-orange-400">Tema:</span>
-                <span className="truncate">ID {profile.theme_id}</span>
+                <span className="truncate">{profile.theme?.name || `ID ${profile.theme_id}`}</span>
               </span>
             </div>
 

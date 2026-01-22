@@ -16,7 +16,7 @@ class ProfileRepository
     public function getByUserId(int $userId): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return Profile::where('user_id', $userId)->get();
+            return Profile::with('theme')->where('user_id', $userId)->get();
         } catch (\Exception $e) {
             throw $e;
         }
@@ -31,7 +31,7 @@ class ProfileRepository
     public function findById(int $id): ?Profile
     {
         try {
-            return Profile::find($id);
+            return Profile::with('theme')->find($id);
         } catch (\Exception $e) {
             throw $e;
         }
@@ -40,7 +40,7 @@ class ProfileRepository
     public function findBySlug(string $slug): ?Profile
     {
         try {
-            return Profile::where('slug', $slug)->first();
+            return Profile::with('theme')->where('slug', $slug)->first();
         } catch (\Exception $e) {
             throw $e;
         }
