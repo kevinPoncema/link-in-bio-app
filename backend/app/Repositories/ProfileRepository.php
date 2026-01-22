@@ -16,7 +16,9 @@ class ProfileRepository
     public function getByUserId(int $userId): \Illuminate\Database\Eloquent\Collection
     {
         try {
-            return Profile::with('theme')->where('user_id', $userId)->get();
+            $profiles = Profile::where('user_id', $userId)->get();
+            $profiles->load('theme');
+            return $profiles;
         } catch (\Exception $e) {
             throw $e;
         }

@@ -115,10 +115,10 @@ function ProfileEdit() {
     }
   };
 
-  const handleThemeChange = (themeName) => {
+  const handleThemeChange = (themeId) => {
     setFormData(prev => ({
       ...prev,
-      theme_id: themeName,
+      theme_id: themeId,
     }));
   };
 
