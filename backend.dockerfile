@@ -27,15 +27,13 @@ COPY ./backend .
 # Configurar permisos para storage y cache
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     && mkdir -p storage/logs \
+    && mkdir -p storage/app/public/profile_pictures \
     && mkdir -p bootstrap/cache \
+    && rm -rf public/storage \
     && chmod -R 775 storage bootstrap/cache
-
-# Crear .env si no existe y generar key
-RUN if [ ! -f .env ]; then cp .env.example .env; fi \
-    && php artisan key:generate --force
 
 # Exponer puerto de Laravel
 EXPOSE 8003
 
-# Comando para iniciar el servidor de Laravel
-CMD php artisan serve --host=0.0.0.0 --port=8003
+# Comando para iniciar el servidor de Laravel  
+CMD ["sh", "-c", "php artisan storage:link 2>/dev/null || true && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=8003"]
