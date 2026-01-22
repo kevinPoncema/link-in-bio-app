@@ -26,22 +26,24 @@ services:
       mysql:
         condition: service_healthy
 
-  # Servicio Frontend - React SPA
+  # Servicio Frontend - React SPA con Vite
   frontend:
     build:
       context: .
       dockerfile: frontend.dockerfile
-      target: production
     container_name: link-in-bio-frontend
     restart: always
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "2901:5173"  # Mapear puerto 5173 del contenedor al 2901 del host
     env_file:
       - ./.env
+    volumes:
+      - ./frontend:/app  # Montar el código fuente para hot-reload
+      - /app/node_modules  # Volume anónimo para node_modules
     networks:
       - link-in-bio-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1/"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:5173/"]
       interval: 30s
       timeout: 10s
       retries: 3

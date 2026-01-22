@@ -42,7 +42,7 @@ start() {
     
     echo -e "\n${GREEN}✅ Despliegue completado!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "Frontend:  ${GREEN}http://localhost:3000${NC}"
+    echo -e "Frontend:  ${GREEN}http://localhost:2901${NC}"
     echo -e "Backend:   ${GREEN}http://localhost:8000${NC}"
     echo -e "MySQL:     ${GREEN}localhost:3306${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
