@@ -37,10 +37,10 @@ class ProfileController extends Controller
             'slug' => 'required|string|unique:profiles|max:255',
             'description' => 'nullable|string',
             'profile_picture' => 'nullable|string', // Base64 string o archivo
-            'theme_name' => 'nullable|string|max:50',
+            'theme_id' => 'nullable|integer|exists:themes,id',
         ]);
 
-        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_name');
+        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_id');
         $data['user_id'] = $userId; // Asignar el ID del usuario autenticado
         
         $profile = $this->profileService->createProfile($data);
@@ -74,9 +74,10 @@ class ProfileController extends Controller
             'main_title' => 'sometimes|required|string|max:255',
             'slug' => 'sometimes|required|string|max:255|unique:profiles,slug,'.$id,
             'profile_picture' => 'nullable|string', // Base64 string o archivo
+            'theme_id' => 'nullable|integer|exists:themes,id',
         ]);
 
-        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_name');
+        $data = $request->only('profile_picture', 'main_title', 'description', 'slug', 'theme_id');
 
         $profile = $this->profileService->updateProfileById($id, $data);
 

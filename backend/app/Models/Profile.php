@@ -21,7 +21,7 @@ class Profile extends Model
         'main_title',
         'description',
         'slug',
-        'theme_name',
+        'theme_id',
     ];
 
     /**
@@ -44,5 +44,16 @@ class Profile extends Model
     public function links(): HasMany
     {
         return $this->hasMany(Link::class);
+    }
+
+    /**
+     * La relación con el tema.
+     * PROFILES pertenece a un Theme.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(Theme::class);
     }
 }
