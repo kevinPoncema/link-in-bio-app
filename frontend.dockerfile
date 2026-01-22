@@ -13,8 +13,8 @@ RUN npm ci --only=production=false
 # Copiar todo el código fuente del frontend
 COPY ./frontend .
 
-# Copiar archivo .env para build
-COPY ./.env .env.production
+# Copiar archivo .env específico del frontend para el build
+COPY ./frontend/.env .env.production
 
 # Construir la aplicación para producción
 RUN npm run build
