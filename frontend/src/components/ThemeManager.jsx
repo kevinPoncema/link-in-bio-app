@@ -338,65 +338,83 @@ const ThemeManager = () => {
               </div>
 
               {/* Colores */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
                     Color Primario *
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={formData.primary_color}
-                      onChange={(e) => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
-                      className="w-12 h-10 rounded-lg cursor-pointer"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-shrink-0">
+                      <input
+                        type="color"
+                        value={formData.primary_color}
+                        onChange={(e) => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
+                        className="w-full sm:w-20 h-12 rounded-xl cursor-pointer border-2 border-gray-600 hover:border-orange-500 transition-colors"
+                        title="Haz click para elegir un color"
+                      />
+                      <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full pointer-events-none">
+                        Click
+                      </div>
+                    </div>
                     <input
                       type="text"
                       value={formData.primary_color}
                       onChange={(e) => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                       placeholder="#000000"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
                     Color Secundario *
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={formData.secondary_color}
-                      onChange={(e) => setFormData(prev => ({ ...prev, secondary_color: e.target.value }))}
-                      className="w-12 h-10 rounded-lg cursor-pointer"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-shrink-0">
+                      <input
+                        type="color"
+                        value={formData.secondary_color}
+                        onChange={(e) => setFormData(prev => ({ ...prev, secondary_color: e.target.value }))}
+                        className="w-full sm:w-20 h-12 rounded-xl cursor-pointer border-2 border-gray-600 hover:border-orange-500 transition-colors"
+                        title="Haz click para elegir un color"
+                      />
+                      <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full pointer-events-none">
+                        Click
+                      </div>
+                    </div>
                     <input
                       type="text"
                       value={formData.secondary_color}
                       onChange={(e) => setFormData(prev => ({ ...prev, secondary_color: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                       placeholder="#000000"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
                     Color de Fondo *
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="color"
-                      value={formData.background_color}
-                      onChange={(e) => setFormData(prev => ({ ...prev, background_color: e.target.value }))}
-                      className="w-12 h-10 rounded-lg cursor-pointer"
-                    />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-shrink-0">
+                      <input
+                        type="color"
+                        value={formData.background_color}
+                        onChange={(e) => setFormData(prev => ({ ...prev, background_color: e.target.value }))}
+                        className="w-full sm:w-20 h-12 rounded-xl cursor-pointer border-2 border-gray-600 hover:border-orange-500 transition-colors"
+                        title="Haz click para elegir un color"
+                      />
+                      <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full pointer-events-none">
+                        Click
+                      </div>
+                    </div>
                     <input
                       type="text"
                       value={formData.background_color}
                       onChange={(e) => setFormData(prev => ({ ...prev, background_color: e.target.value }))}
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                       placeholder="#000000"
                     />
                   </div>
