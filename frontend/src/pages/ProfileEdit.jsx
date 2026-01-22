@@ -239,17 +239,17 @@ function ProfileEdit() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      <nav className="bg-gray-800 border-b border-gray-700 p-4 sticky top-0 z-10">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+      <nav className="bg-gray-800 border-b border-gray-700 p-3 sm:p-4 sticky top-0 z-10">
+        <div className="container mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0">
             <button
               onClick={handleBack}
-              className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 text-gray-400 hover:text-white transition-colors flex-shrink-0"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Volver</span>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline text-sm">Volver</span>
             </button>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
+            <h1 className="text-base sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent truncate">
               Editar Perfil
             </h1>
           </div>
@@ -257,17 +257,17 @@ function ProfileEdit() {
           <button
             onClick={handleSaveProfile}
             disabled={saving}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-1 sm:space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base flex-shrink-0"
           >
             {saving ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Guardando...</span>
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                <span className="hidden sm:inline">Guardando...</span>
               </>
             ) : (
               <>
-                <Save className="w-5 h-5" />
-                <span>Guardar Cambios</span>
+                <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Guardar Cambios</span>
               </>
             )}
           </button>
@@ -276,23 +276,23 @@ function ProfileEdit() {
 
       {/* Main Content con Theme Provider */}
       <ThemeProvider themeName={formData.theme_name}>
-        <main className="container mx-auto p-8 max-w-5xl">
+        <main className="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
           {/* Mensajes */}
           {error && (
-            <div className="flex items-center space-x-2 bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-xl mb-6">
-              <AlertCircle className="w-5 h-5" />
+            <div className="flex items-center space-x-2 bg-red-900 border border-red-700 text-red-300 px-3 py-2 sm:px-4 sm:py-3 rounded-xl mb-4 sm:mb-6 text-sm">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="flex items-center space-x-2 bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-xl mb-6">
-              <CheckCircle className="w-5 h-5" />
+            <div className="flex items-center space-x-2 bg-green-900 border border-green-700 text-green-300 px-3 py-2 sm:px-4 sm:py-3 rounded-xl mb-4 sm:mb-6 text-sm">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span>{success}</span>
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {/* Columna Izquierda - Información del Perfil */}
             <div className="lg:col-span-1">
               <ProfileFormSection 

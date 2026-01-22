@@ -55,40 +55,40 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
       style={style}
       className={`bg-gray-700 rounded-xl border ${
         isDragging ? 'border-orange-500 shadow-lg' : 'border-gray-600'
-      } hover:border-gray-500 transition-all`}
+      } hover:border-gray-500 transition-all touch-none`}
     >
-      <div className="p-4 flex items-center space-x-4">
+      <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
         {/* Drag Handle */}
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-300"
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-300 touch-none flex-shrink-0"
         >
-          <GripVertical className="w-5 h-5" />
+          <GripVertical className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
 
         {/* Icon Badge - Muestra el icono dinámico */}
-        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
+        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-lg flex items-center justify-center">
           <DynamicIcon 
             iconName={link.icon_class}
-            className="w-6 h-6 text-white"
+            className="w-4 h-4 sm:w-6 sm:h-6 text-white"
           />
         </div>
 
         {/* Link Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
-            <h4 className="text-white font-semibold truncate">
+          <div className="flex items-center space-x-2 mb-0.5 sm:mb-1">
+            <h4 className="text-sm sm:text-base text-white font-semibold truncate">
               {link.title}
             </h4>
           </div>
-          <div className="flex items-center space-x-2">
-            <ExternalLink className="w-3 h-3 text-gray-500 flex-shrink-0" />
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-500 flex-shrink-0" />
             <a 
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-gray-400 hover:text-orange-400 truncate transition-colors"
+              className="text-xs sm:text-sm text-gray-400 hover:text-orange-400 truncate transition-colors"
             >
               {link.url}
             </a>
@@ -96,25 +96,25 @@ const SortableLink = ({ link, index, onEdit, onDelete, deletingId }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
           <button
             onClick={() => onEdit(link)}
             disabled={deletingId === link.id}
-            className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1.5 sm:p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Editar link"
           >
-            <Edit2 className="w-4 h-4 text-blue-400" />
+            <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-400" />
           </button>
           <button
             onClick={() => onDelete(link.id)}
             disabled={deletingId === link.id}
-            className="p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1.5 sm:p-2 hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Eliminar link"
           >
             {deletingId === link.id ? (
-              <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+              <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-red-400" />
             ) : (
-              <Trash2 className="w-4 h-4 text-red-400" />
+              <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
             )}
           </button>
         </div>
@@ -323,12 +323,12 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
   }
 
   return (
-    <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-6 border border-gray-700">
+    <div className="bg-gray-800/80 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-gray-700">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
         <div>
-          <h2 className="text-xl font-bold text-white">Links del Perfil</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-lg sm:text-xl font-bold text-white">Links del Perfil</h2>
+          <p className="text-xs sm:text-sm text-gray-400 mt-1">
             Gestiona y ordena tus enlaces
           </p>
           {themeName && themeName !== 'default' && (
@@ -337,31 +337,31 @@ const LinkList = ({ profileId, themeName = 'default', onLinksChange }) => {
             </p>
           )}
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center flex-wrap gap-2 sm:gap-3">
           {hasUnsavedChanges && (
             <button
               onClick={handleSaveOrder}
               disabled={savingOrder}
-              className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center space-x-1 sm:space-x-2 bg-green-600 hover:bg-green-700 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm font-semibold transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {savingOrder ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span>Guardando...</span>
+                  <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                  <span className="hidden sm:inline">Guardando...</span>
                 </>
               ) : (
                 <>
-                  <Save className="w-5 h-5" />
-                  <span>Guardar Orden</span>
+                  <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Guardar Orden</span>
                 </>
               )}
             </button>
           )}
           <button
             onClick={handleAddLink}
-            className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2 rounded-xl font-semibold transition-all shadow-lg"
+            className="flex items-center space-x-1 sm:space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-3 py-2 sm:px-4 sm:py-2 rounded-xl text-sm font-semibold transition-all shadow-lg"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
             <span>Agregar Link</span>
           </button>
         </div>
