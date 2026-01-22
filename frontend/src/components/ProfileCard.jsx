@@ -82,15 +82,15 @@ const ProfileCard = ({ profile, onDelete }) => {
 
   return (
     <>
-      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-orange-500 transition-all shadow-lg relative group">
+      <div className="bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-700 hover:border-orange-500 transition-all shadow-lg relative group">
         {/* Botón de menú de 3 puntos */}
-        <div className="absolute top-4 right-4" ref={menuRef}>
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4" ref={menuRef}>
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 rounded-full hover:bg-gray-700 transition-colors text-gray-400 hover:text-white"
+            className="p-1.5 sm:p-2 rounded-full hover:bg-gray-700 transition-colors text-gray-400 hover:text-white"
             aria-label="Opciones"
           >
-            <MoreVertical className="w-5 h-5" />
+            <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Menú desplegable */}
@@ -115,64 +115,64 @@ const ProfileCard = ({ profile, onDelete }) => {
         </div>
 
         {/* Contenido de la tarjeta */}
-        <div className="flex items-start space-x-4">
+        <div className="flex items-start space-x-3 sm:space-x-4">
           {/* Imagen de perfil o placeholder */}
           <div className="flex-shrink-0">
             {profile.profile_picture_url ? (
               <img
                 src={getFullImageUrl(profile.profile_picture_url)}
                 alt={profile.main_title}
-                className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-orange-500"
               />
             ) : (
-              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
-                <User className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center">
+                <User className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
               </div>
             )}
           </div>
 
           {/* Información del perfil */}
-          <div className="flex-1 min-w-0 pr-8">
-            <h3 className="text-xl font-bold text-white mb-1 truncate">
+          <div className="flex-1 min-w-0 pr-6 sm:pr-8">
+            <h3 className="text-base sm:text-xl font-bold text-white mb-1 truncate">
               {profile.main_title}
             </h3>
-            <p className="text-sm text-gray-400 mb-2 line-clamp-2">
+            <p className="text-xs sm:text-sm text-gray-400 mb-2 line-clamp-2 text-center">
               {profile.description || 'Sin descripción'}
             </p>
-            <div className="flex items-center space-x-4 text-xs text-gray-500 mb-3">
-              <span className="flex items-center space-x-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center sm:space-x-4 text-xs text-gray-500 mb-3 gap-1 sm:gap-0">
+              <span className="flex items-center justify-center space-x-1">
                 <span className="font-semibold text-orange-400">Slug:</span>
-                <span className="truncate max-w-[150px]">{profile.slug}</span>
+                <span className="truncate max-w-[120px] sm:max-w-[150px]">{profile.slug}</span>
               </span>
-              <span className="flex items-center space-x-1">
+              <span className="flex items-center justify-center space-x-1">
                 <span className="font-semibold text-orange-400">Tema:</span>
-                <span>{profile.theme_name}</span>
+                <span className="truncate">{profile.theme_name}</span>
               </span>
             </div>
 
             {/* Botones de acción */}
-            <div className="flex items-center space-x-2 mt-3">
+            <div className="flex items-center flex-wrap gap-2 mt-3">
               {/* Botón Compartir */}
               <button
                 onClick={handleShareProfile}
-                className="relative flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-all shadow-md"
+                className="relative flex items-center space-x-1 sm:space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-white text-xs sm:text-sm font-semibold transition-all shadow-md"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>Compartir</span>
               </button>
 
               {/* Botón QR */}
               <button
                 onClick={handleOpenQRModal}
-                className="flex items-center space-x-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-all shadow-md"
+                className="flex items-center space-x-1 sm:space-x-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-white text-xs sm:text-sm font-semibold transition-all shadow-md"
               >
-                <QrCode className="w-4 h-4" />
+                <QrCode className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span>QR</span>
               </button>
 
               {/* Feedback de copiado */}
               {showCopyFeedback && (
-                <div className="absolute left-0 right-0 -bottom-8 flex justify-center">
+                <div className="absolute left-0 right-0 -bottom-8 flex justify-center z-10">
                   <div className="bg-green-500 text-white px-4 py-1 rounded-lg text-xs font-semibold shadow-lg">
                     ¡Enlace copiado!
                   </div>

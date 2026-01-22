@@ -111,42 +111,43 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
-      <nav className="bg-gray-800 border-b border-gray-700 p-4">
+      <nav className="bg-gray-800 border-b border-gray-700 p-3 sm:p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
+          <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-pink-500 to-orange-500 bg-clip-text text-transparent">
             Link in Bio
           </h1>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <User className="w-5 h-5 text-orange-400" />
-              <span className="text-gray-300">{user?.name || user?.email}</span>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+              <span className="hidden sm:inline text-gray-300 text-sm truncate max-w-[120px] md:max-w-none">{user?.name || user?.email}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 bg-red-600 hover:bg-red-700 px-2 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors"
+              title="Cerrar sesión"
             >
               <LogOut className="w-4 h-4" />
-              <span>Cerrar sesión</span>
+              <span className="hidden sm:inline text-sm">Cerrar sesión</span>
             </button>
           </div>
         </div>
       </nav>
 
-      <main className="container mx-auto p-8">
+      <main className="container mx-auto p-4 sm:p-6 md:p-8">
         {/* Sección de Perfiles */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Mis Perfiles</h2>
-              <p className="text-gray-400">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2">Mis Perfiles</h2>
+              <p className="text-sm sm:text-base text-gray-400">
                 Gestiona tus perfiles de Link in Bio
               </p>
             </div>
             <button
               onClick={handleCreateProfile}
-              className="flex items-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg"
+              className="flex items-center justify-center space-x-2 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Crear Perfil</span>
             </button>
           </div>
@@ -194,7 +195,7 @@ function Home() {
             </div>
           ) : (
             /* Lista de perfiles */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {profiles.map((profile) => (
                 <ProfileCard
                   key={profile.id}
