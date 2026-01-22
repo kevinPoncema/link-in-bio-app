@@ -7,6 +7,7 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 2999,
     strictPort: true,
+    allowedHosts: ['link-in-bio.kevinponcedev.xyz'],
     watch: {
       usePolling: true,
     },
