@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: link_in_bio_db
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PORT:-3309}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-link_in_bio_db}
+      MYSQL_USER: ${DB_USERNAME:-link_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-link_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    container_name: link_in_bio_backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8006}:8003"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mysql # Forzamos a que use el seºrvicio de la red interna
+    volumes:
+      - ./backend:/var/www/html
+      # Evitamos sobreescribir el vendor del contenedor con la carpeta local
+      - /var/www/html/vendor
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.dockerfile
+    container_name: link_in_bio_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-2901}:2999"
+    volumes:
+      - ./frontend:/app
+      # Evitamos sobreescribir los node_modules del contenedor
+      - /app/node_modules
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
