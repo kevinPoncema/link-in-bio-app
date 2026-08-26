@@ -12,8 +12,6 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-link_password}
     volumes:
       - mysql_data_prod:/var/lib/mysql
-    networks:
-      - app-network
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
@@ -32,14 +30,11 @@ services:
       - DB_HOST=mysql
       - APP_ENV=production
       - APP_DEBUG=false
-    # Coolify detectará este puerto automáticamente o te pedirá configurarlo en su panel.
-    ports:
-      - "${BACKEND_PORT:-8000}:80"
+    expose:
+      - "80"
     depends_on:
       mysql:
         condition: service_healthy
-    networks:
-      - app-network
 
   frontend:
     build:
@@ -47,15 +42,8 @@ services:
       dockerfile: frontend.prod.dockerfile
     container_name: link_in_bio_frontend_prod
     restart: always
-    # Coolify detectará este puerto automáticamente o te pedirá configurarlo en su panel.
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+    expose:
+      - "80"
 
 volumes:
   mysql_data_prod:
