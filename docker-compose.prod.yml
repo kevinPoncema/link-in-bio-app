@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: link_in_bio_db_prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:-link_in_bio_db}
+      MYSQL_USER: ${DB_USERNAME:-link_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-link_password}
+    volumes:
+      - mysql_data_prod:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend.prod.dockerfile
+    container_name: link_in_bio_backend_prod
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mysql
+      - APP_ENV=production
+      - APP_DEBUG=false
+    # Coolify detectará este puerto automáticamente o te pedirá configurarlo en su panel.
+    ports:
+      - "${BACKEND_PORT:-8000}:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.prod.dockerfile
+    container_name: link_in_bio_frontend_prod
+    restart: always
+    # Coolify detectará este puerto automáticamente o te pedirá configurarlo en su panel.
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data_prod:
