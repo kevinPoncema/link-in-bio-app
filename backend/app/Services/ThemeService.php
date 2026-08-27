@@ -68,7 +68,6 @@ class ThemeService
      */
     protected function saveBase64Image(string $base64Data): ?string
     {
-        // Extraer el tipo de imagen y los datos
         preg_match('/data:image\/(\w+);base64,(.*)/', $base64Data, $matches);
         
         if (count($matches) !== 3) {
@@ -78,15 +77,13 @@ class ThemeService
         $extension = $matches[1];
         $imageContent = base64_decode($matches[2]);
         
-        // Generar nombre único
         $fileName = 'theme_' . time() . '_' . Str::random(10) . '.' . $extension;
+        $disk = config('filesystems.default');
         $storagePath = 'theme_previews/' . $fileName;
         
-        // Guardar la imagen
-        Storage::disk('public')->put($storagePath, $imageContent);
+        Storage::disk($disk)->put($storagePath, $imageContent, 'public');
         
-        // Retornar la URL completa
-        return $this->getImageUrl($fileName);
+        return Storage::disk($disk)->url($storagePath);
     }
 
     /**
@@ -98,23 +95,12 @@ class ThemeService
     protected function saveUploadedFile($file): ?string
     {
         $fileName = 'theme_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+        $disk = config('filesystems.default');
         $storagePath = 'theme_previews/' . $fileName;
         
-        Storage::disk('public')->put($storagePath, file_get_contents($file));
+        Storage::disk($disk)->put($storagePath, file_get_contents($file), 'public');
         
-        return $this->getImageUrl($fileName);
-    }
-
-    /**
-     * Obtiene la URL completa de la imagen
-     *
-     * @param string $fileName
-     * @return string
-     */
-    protected function getImageUrl(string $fileName): string
-    {
-        $backendUrl = config('app.url');
-        return "{$backendUrl}/storage/theme_previews/{$fileName}";
+        return Storage::disk($disk)->url($storagePath);
     }
 
     /**
@@ -125,12 +111,22 @@ class ThemeService
      */
     protected function deleteOldImage(string $imageUrl): void
     {
-        // Extraer el nombre del archivo de la URL
-        $fileName = basename(parse_url($imageUrl, PHP_URL_PATH));
-        $storagePath = 'theme_previews/' . $fileName;
-        
-        if (Storage::disk('public')->exists($storagePath)) {
-            Storage::disk('public')->delete($storagePath);
+        try {
+            $disk = config('filesystems.default');
+            
+            // Extraer el nombre del archivo de la URL
+            $parts = explode('/', $imageUrl);
+            $fileName = end($parts);
+            
+            if ($fileName) {
+                $storagePath = 'theme_previews/' . $fileName;
+                
+                if (Storage::disk($disk)->exists($storagePath)) {
+                    Storage::disk($disk)->delete($storagePath);
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Error al eliminar preview de tema antiguo: ' . $e->getMessage());
         }
     }
 
