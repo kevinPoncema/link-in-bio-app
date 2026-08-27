@@ -58,25 +58,22 @@ class ProfileService
      */
     protected function saveBase64Image(string $base64Data): ?string
     {
-        // Extraer el tipo de imagen y los datos
         preg_match('/data:image\/(\w+);base64,(.*)/', $base64Data, $matches);
         
         if (count($matches) !== 3) {
             return null;
         }
 
-        $extension = $matches[1]; // jpg, png, gif, etc.
+        $extension = $matches[1];
         $imageContent = base64_decode($matches[2]);
         
-        // Generar nombre único
         $fileName = time() . '_' . Str::random(10) . '.' . $extension;
-        $storagePath = 'profile_pictures/' . $fileName;
+        $disk = config('images.profile_pictures.disk');
+        $storagePath = config('images.profile_pictures.path') . '/' . $fileName;
         
-        // Guardar la imagen en storage/app/public/profile_pictures/
-        Storage::disk('public')->put($storagePath, $imageContent);
+        Storage::disk($disk)->put($storagePath, $imageContent, 'public');
         
-        // Retornar la URL completa con el dominio del backend
-        return $this->getImageUrl($fileName);
+        return Storage::disk($disk)->url($storagePath);
     }
 
     /**
@@ -88,28 +85,12 @@ class ProfileService
     protected function saveUploadedFile($file): ?string
     {
         $fileName = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        $storagePath = 'profile_pictures/' . $fileName;
+        $disk = config('images.profile_pictures.disk');
+        $storagePath = config('images.profile_pictures.path') . '/' . $fileName;
         
-        // Guardar el archivo en storage/app/public/profile_pictures/
-        Storage::disk('public')->put($storagePath, file_get_contents($file));
+        Storage::disk($disk)->put($storagePath, file_get_contents($file), 'public');
         
-        // Retornar la URL completa con el dominio del backend
-        return $this->getImageUrl($fileName);
-    }
-
-    /**
-     * Construye la URL completa de la imagen
-     *
-     * @param string $fileName
-     * @return string
-     */
-    protected function getImageUrl(string $fileName): string
-    {
-        // Obtener la URL base del backend desde config
-        $baseUrl = rtrim(config('app.url'), '/');
-        
-        // Construir la URL completa: http://localhost:8000/storage/profile_pictures/filename.jpg
-        return $baseUrl . '/storage/profile_pictures/' . $fileName;
+        return Storage::disk($disk)->url($storagePath);
     }
 
     /**
@@ -121,20 +102,21 @@ class ProfileService
     protected function deleteOldImage(string $imageUrl): void
     {
         try {
-            // Extraer solo el nombre del archivo de la URL
-            // Ej: http://localhost:8000/storage/profile_pictures/123_abc.jpg -> 123_abc.jpg
-            $parts = explode('/storage/profile_pictures/', $imageUrl);
+            $disk = config('images.profile_pictures.disk');
+            $basePath = config('images.profile_pictures.path');
             
-            if (count($parts) === 2) {
-                $fileName = $parts[1];
-                $storagePath = 'profile_pictures/' . $fileName;
+            // Extraemos el nombre del archivo de la URL buscando la última parte después del /
+            $parts = explode('/', $imageUrl);
+            $fileName = end($parts);
+            
+            if ($fileName) {
+                $storagePath = $basePath . '/' . $fileName;
                 
-                if (Storage::disk('public')->exists($storagePath)) {
-                    Storage::disk('public')->delete($storagePath);
+                if (Storage::disk($disk)->exists($storagePath)) {
+                    Storage::disk($disk)->delete($storagePath);
                 }
             }
         } catch (\Exception $e) {
-            // Log el error pero no detener la ejecución
             \Log::warning('Error al eliminar imagen antigua: ' . $e->getMessage());
         }
     }
